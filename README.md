@@ -1,5 +1,5 @@
 ![IGClogo](https://github.com/dsobral/ADER17S/raw/master/Logo_IGC_2014.png "IGC")
-![ELIXIRPTlogo](https://github.com/dsobral/ADER17S/raw/master/elixirportugal-logo.png "ELIXIR Portugal")
+![Acknowledgments](https://github.com/dsobral/ADER/raw/master/material/images/acknowledgments.jpg "Acknowledgments")
 
 
 # ADER18S #
@@ -18,7 +18,7 @@ http://gtpb.igc.gulbenkian.pt/bicourses/2018/ADER18S/index.html
 
 # Overview
 
-This introductory course covers practical aspects of the analysis of differential gene expression by RNAseq, from planning the gathering of sequence data to the generation of tables of differentially expressed gene lists and visualization of results. We we will also cover some of the initial steps of secondary analysis, such as functional enrichment of the obtained gene lists. Participants will first start learning the concepts using small example datasets, and then will apply the learned concepts in the training room using real sized examples. At the end of the course, participants should be able to autonomously apply most of the learned methods to their own data.
+This introductory course covers practical aspects of the analysis of differential gene expression by RNAseq, from planning the gathering of sequence data to the generation of tables of differentially expressed gene lists and visualization of results. For this edition of the course, we will also explore some specificities of single-cell RNAseq data analysis. Towards the end, we will cover some of the initial steps of secondary analysis, such as functional enrichment of the obtained gene lists. Participants will first start learning the concepts using small example datasets, and then will apply the learned concepts in the training room using real sized examples. At the end of the course, participants should be able to autonomously apply most of the learned methods to their own data.
 
 # Target Audiences
 
@@ -46,7 +46,7 @@ Course participants will go through a series of experiences that utimately lead 
 6. Assess the general quality of the alignments and detect possible problems
 7. Generate tables of counts using the alignment and a reference gene annotation
 8. Generate lists of differentially expressed genes, at least for a simple pairwise comparison
-9. Understand specificies of differential gene expression in the case of single-cell RNA-Seq
+9. Understand specificies of differential gene expression in the case of single-cell RNAseq
 10. Perform simple functional enrichment analysis and understand the concepts behind them
 
 For this, we are providing small example datasets and exercises that participants can use to learn. 
@@ -62,8 +62,8 @@ For this, we are providing small example datasets and exercises that participant
 ####	LO 1.2 - Choose adequate sequencing for your biological question
 		How do the sequencing choices influence the kind of questions you can answer
 
-### LO 2 - List steps in the analysis of RNA-Seq differential expression experiments
-		What are the steps in RNA-Seq data analysis
+### LO 2 - List steps in the analysis of RNAseq differential expression experiments
+		What are the steps in RNAseq data analysis
 
 ### LO 3 - Assess the general quality of the raw data from the sequencing facility
 
@@ -80,7 +80,7 @@ For this, we are providing small example datasets and exercises that participant
 		Use trimmomatic to filter/trim low quality bases from your reads
 
 #### 	LO 4.2 - Use trimmomatic to remove adaptors and other artefactual sequences from your reads
-		Remove adaptors (such as illumina adaptors) from your reads
+		Remove adaptors (eg. illumina adaptors) and unwanted sequences (eg. polyA tails) from your reads
 		Check results using FastQC on filtered data
 
 ### LO 5 - Generate alignments of processed reads against a reference genome
@@ -90,12 +90,12 @@ For this, we are providing small example datasets and exercises that participant
 		Obtain genome fasta from Ensembl
 
 #### 	LO 5.2 - Alignment software: hisat2; salmon
-		What are the conditions of using burrows-wheeler approaches?	
+		What are the requisites for using burrows-wheeler approaches?	
 		Prepare a reference genome to use with hisat2
 
 #### 	LO 5.3 - Run an alignment: the SAM/BAM alignment format
 		Run hisat2 in an example dataset
-		What is the SAM format; what is the BAM format
+		What is the SAM/BAM format
 	
 ### LO 6 - Assess the general quality of the alignments and detect possible problems
 
@@ -115,8 +115,10 @@ For this, we are providing small example datasets and exercises that participant
 		What parameters we need to consider when counting
 
 #### 	LO 7.2 - Use featurecounts to generate table of gene counts
+		Interpret results from featurecounts
 
 #### 	LO 7.3 - Using Salmon to generate counts only with the transcriptome
+		Interpret results from salmon
 
 ### LO 8 - Generate lists of differentially expressed genes, at least for a simple pairwise comparison
 
@@ -125,14 +127,27 @@ For this, we are providing small example datasets and exercises that participant
 
 #### 	LO 8.2 - Interpretation and visualization of results
 		PCA plots comparing all samples: detection of outliers, and batch effects
-		Visualize expression profiles of top differentially expressed genes
-		Produce other plots such as vulcano plots
+		Heatmaps and other plots
 
 #### 	LO 8.3 - Use more complex settings than simple pairwise comparisons
 		Account for batch effects and paired data 
-		Performing ANOVA-like comparisons
+				
+#### 	LO 8.4 - Gain control over your analysis using R and Rstudio
+		Use R in Rstudio to make a pairwise comparison using DESeq2 and edgeR
+		Use edgeR to perform more complex analysis such as ANOVA-like all versus all comparisons
 
-### LO 9 - Understand specificies of differential gene expression in the case of single-cell RNA-Seq
+### LO 9 - Understand specificies of differential gene expression in single-cell RNAseq
+
+#### 	LO 9.1 - Generate a count matrix for a single-cell RNAseq dataset (Chromium - 10x Genomics)
+		Specificities of single-cell RNAseq, using the Chromium system as example
+		Diferences in raw data preprocessing and counting
+
+#### 	LO 9.2 - Generate groups of cells by clustering gene expression
+		Quality checking and filtering of the count table
+		Interpreting PCA plots and dimensionality reduction
+
+#### 	LO 9.3 - Obtain marker genes for the different groups of cells
+		Indentify genes that distinguish the different groups
 
 ### LO 10 - Perform simple functional enrichment analysis and understand the concepts involved
 		
@@ -171,40 +186,40 @@ For this, we are providing small example datasets and exercises that participant
 + 12:30 - 14:00 ***LUNCH BREAK***
 + 14:00 - 16:00 [The process of generating gene counts from genome aligments](material/Practical.md#LO7.1). [Use featurecounts to generate tables of gene counts](material/Practical.md#LO7.2). [Use Salmon to generate counts using only the transcriptome](material/Practical.md#LO7.3).
 + 16:00 - 16:30 ***Tea Break***
-+ 16:30 - 18:00 [Using the R package edgeR and DESeq2 in Galaxy to produce a pairwise differential expression analysis](material/Practical.md#LO8.1)
++ 16:30 - 18:00 [Execute a pairwise differential expression analysis](material/Practical.md#LO8.1)
 
 
 ### Wednesday, October 10th
 
 + 09:30 - 10:00 Morning Wrap-up (what have we done so far?)
-+ 10:00 - 11:00 [Use edgeR and DESeq2 in R and RStudio](material/Practical.md#LO8.1). 
++ 10:00 - 11:00 [Interpretation and visualization of results](material/Practical.md#LO8.2). 
 + 11:00 - 11:30 ***Coffee Break***
 + 11:30 - 12:30 [Interpretation and visualization of results](material/Practical.md#LO8.2).
 + 12:30 - 14:00 ***LUNCH BREAK***
-+ 14:00 - 16:00 [Interpretation and visualization of results](material/Practical.md#LO8.2).
++ 14:00 - 16:00 [More complex settings: batch effects and paired samples](material/Practical.md#LO8.3).
 + 16:00 - 16:30 ***Tea Break***
-+ 16:30 - 18:00 [More complex settings: batch effects and paired samples](material/Practical.md#LO8.3).
++ 16:30 - 18:00 [Gain control over your analysis using R and Rstudio](material/Practical.md#LO8.4).
 
 
 ### Thursday, October 11th
 
 + 09:30 - 10:00 Morning wrap-up (what have we done so far?)
-+ 10:00 - 11:00 Specificities of Single Cell Analysis.
++ 10:00 - 11:00 [Specificities of single-cell RNAseq, using the Chromium system as example](material/Practical.md#LO9.1).
 + 11:00 - 11:30 ***Coffee Break***
-+ 11:30 - 12:30 Specificities of Single Cell Analysis.
++ 11:30 - 12:30 [Generate a count matrix for a single-cell RNAseq dataset](material/Practical.md#LO9.1).
 + 12:30 - 14:00 ***LUNCH BREAK***
-+ 14:00 - 16:00 Specificities of Single Cell Analysis.
++ 14:00 - 16:00 [Generate groups of cells by clustering gene expression](material/Practical.md#LO9.2).
 + 16:00 - 16:30 ***Tea Break***
-+ 16:30 - 18:00 Specificities of Single Cell Analysis.
++ 16:30 - 18:00 [Obtain marker genes for the different groups of cells](material/Practical.md#LO9.3).
 
 ### Friday, October 11th
 
 + 09:30 - 10:00 Morning wrap-up (what have we done so far?)
-+ 10:00 - 11:00 [How to extract meaning from a list of genes](material/Practical.md#LO9.1).
++ 10:00 - 11:00 [How to extract meaning from a list of genes](material/Practical.md#LO10.1).
 + 11:00 - 11:30 ***Coffee Break***
-+ 11:30 - 12:30 [Understand the concept of functional enrichment analysis, and the statistics involved](material/Practical.md#LO9.2).
++ 11:30 - 12:30 [Understand the concept of functional enrichment analysis, and the statistics involved](material/Practical.md#LO10.2).
 + 12:30 - 14:00 ***LUNCH BREAK***
-+ 14:00 - 16:00 [Interpret the results of functional enrichment analysis](material/Practical.md#LO9.3).
++ 14:00 - 16:00 [Interpret the results of functional enrichment analysis](material/Practical.md#LO10.3).
 + 16:00 - 16:30 ***Tea Break***
 + 16:30 - 18:00 Final wrap-up Session.
 
