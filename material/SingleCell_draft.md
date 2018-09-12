@@ -28,17 +28,17 @@ Within each GEM, the cell mRNA is reverse-transcribed such that its cDNA carries
 
 After reverse-transcription is completed, the resulting cDNA library is obtained by pooling all GEMs and removing the oil from the solution. This library can then be sequenced by standard short-read sequencing (e.g. Illumina).
 
-Sequencing is done in paired end-mode and, unlike in bulk RNA-seq, the number of cycles (number of bases sequenced) is different for the forward and reverse reads: the first read is 26 bp long and contains the *cell barcode* and *UMI*, while the second read is longer (100 bp are recommended) and contains the mRNA sequence, sequenced from the 3' end.
+Sequencing is done in paired end-mode and, unlike in bulk RNA-seq, the number of cycles (number of bases sequenced) is different for the forward and reverse reads: the first read is 26 bp long and contains the 16 bp *cell barcode* and 10 bp *UMI*, while the second read is longer (100 bp are recommended) and contains the mRNA sequence, sequenced from the 3' end.
 
 ![Overview of single-cell workflow](images/Chromium10x.png)
-<center>[Chromium Single Cell Gene Expression Solution](https://www.10xgenomics.com/solutions/single-cell/)</center>
+[Chromium Single Cell Gene Expression Solution](https://www.10xgenomics.com/solutions/single-cell/)
 
 ## Single Cell Data Analysis
 
 Conceptually, the analysis of a scRNA-seq sample for the purpose of identifying and characterizing cell subpopulations, starts with preprocessing of raw reads, then reads are mapped to a reference genome and quantified in an *UMI count matrix*. Downstream analyses of this count matrix allow the identification and characterization of subpopulations of cells.
 
 ![Single Cell Transcriptomics Analysis Workflow](images/single-cell-analysis-workflow.jpg)
-<center>[Poirion *et al.* Frontiers in Genetics (2016)](https://www.frontiersin.org/articles/10.3389/fgene.2016.00163/full)</center>
+[Poirion *et al.* Frontiers in Genetics (2016)](https://www.frontiersin.org/articles/10.3389/fgene.2016.00163/full)
 
 #### 1. Preprocessing
 
@@ -80,9 +80,7 @@ To identify marker genes for a subpopulation of cells, differential expression (
 
 ![](images/de_evaluation.png)
 
-<center>
 Bias, robustness and scalability in single-cell differential expression analysis. [Soneson and Robinson, Nature Methods (2018)](https://www.nature.com/articles/nmeth.4612)
-</center>
 
 ---
 
@@ -245,7 +243,11 @@ This command will display the first 6 lines from the UMI matrix file. The values
 
 ## LO XX: Use Drop-seq tools to obtain an UMI count matrix
 
-While `cellranger count` is a self-contained pipeline that automates all the steps necessary to obtain the *UMI* count matrix and works well with datasets obtained from the Chromium platform, a number of alternative pipelines exist that allow greater flexibility in the analysis, such as [Drop-seq tools](http://mccarrolllab.com/dropseq/) and [UMI tools]().
+While `cellranger count` is a self-contained pipeline that automates all the steps necessary to obtain the *UMI* count matrix, it was designed to work with datasets obtained exclusively from the Chromium platform. To work with datasets obtained with other single-cell methods greater flexibility is needed. For this a number of alternative pipelines are available that allow greater flexibility in the analysis, such as [Drop-seq tools](http://mccarrolllab.com/dropseq/) and [UMI tools](https://github.com/CGATOxford/UMI-tools).
+
+Here we will use Drop-seq tools to obtain an UMI count matrix using a lung scRNA-seq from the Mouse Cell Atlas study ([Han, Xiaoping, et al. "Mapping the mouse cell atlas by Microwell-seq." Cell 172.5 (2018)](https://doi.org/10.1016/j.cell.2018.02.001)).
+
+*Note: In this part of the tutorial we will use a subset of 1M reads from the original dataset. Running the commands below on the full dataset would take approximately 4h30m on a workstation with at least 4 cores and 16Gb of RAM.*
 
 **Task**: Run the following commands, one at a time, to obtain the UMI count matrix using the Drop-seq tools pipeline. Take time to inspect and understand the output of each step.
 
@@ -269,57 +271,63 @@ export PATH=software/Drop-seq_tools-1.13:$PATH
 The first step is to convert our paired-end FastQ files to an unaligned sam/bam format. This will facilitate extraction of the cell barcodes and UMI and their association to the RNA read.
 
 ```
-picard-tools FastqToSam FASTQ=fastqs/pbmc4k_sample/pbmc4k_sample_S1_L001_R1_001.fastq.gz FASTQ2=fastqs/pbmc4k_sample/pbmc4k_sample_S1_L001_R2_001.fastq.gz QUALITY_FORMAT=Standard SAMPLE_NAME=pbmc4k_sample OUTPUT=output_dropseq/pbmc4k_sample_unaligned.bam
+java -jar software/picard.jar FastqToSam FASTQ=fastqs/sample_lung_1.fastq.gz FASTQ2=fastqs/sample_lung_2.fastq.gz QUALITY_FORMAT=Standard SAMPLE_NAME=lung1_sample OUTPUT=output_dropseq/lung1_sample_unaligned.bam
 ```
 
-The above command will generate a new file called `output/pbmc4k_sample_unaligned.bam` that contains both the first and second reads from the original FastQ files. You can inspect the first lines of this file with the command:
+The above command will generate a new file called `output/lung1_sample_unaligned.bam` that contains both the first and second reads from the original FastQ files. You can inspect the first lines of this file with the command:
 
 ```
-samtools view output_dropseq/pbmc4k_sample_unaligned.bam | head
+samtools view output_dropseq/lung1_sample_unaligned.bam | head
 ```
 
 #### 1.2 TagBamWithReadSequenceExtended
 
-Next we extract the cell barcode from the first 16 bases of left reads. The barcode will be assiciated to the RNA (right) reads using an extended sam tag that we name *XC* (the C stands for Cell).
+Next we extract the cell barcode from the first 16 bases of left reads. The barcode will be associated to the RNA (right) reads using an extended sam tag that we name *XC* (the C stands for Cell). The `BASE_RANGE` option allows us to specify where in the read the barcode is located. In Chromium scRNA-seq the barcode is located in the first 16 bases of the left read, so we would set this option to `BASE_RANGE=1-16`. However, in this Microwell-seq dataset, the 18 bp barcode is  split in three parts of 6 bp separated by 15 bp linkers. To account for this we specify `BASE_RANGE=1-6:22-27:43-48`. The specified regions of the read will be extracted and concatenated in orther to form the final barcode.
 
 ```
-TagBamWithReadSequenceExtended INPUT=output_dropseq/pbmc4k_sample_unaligned.bam OUTPUT=output_dropseq/pbmc4k_sample_unaligned_cell.bam SUMMARY=output_dropseq/pbmc4k_sample_unaligned_cell.bam_summary.txt BASE_RANGE=1-16 BASE_QUALITY=10 BARCODED_READ=1 DISCARD_READ=False TAG_NAME=XC NUM_BASES_BELOW_QUALITY=1
+TagBamWithReadSequenceExtended INPUT=output_dropseq/lung1_sample_unaligned.bam OUTPUT=output_dropseq/lung1_sample_unaligned_cell.bam SUMMARY=output_dropseq/lung1_sample_unaligned_cell.bam_summary.txt BASE_RANGE=1-6:22-27:43-48 BASE_QUALITY=10 BARCODED_READ=1 DISCARD_READ=False TAG_NAME=XC NUM_BASES_BELOW_QUALITY=1
 ```
 
 Notice the added *XC* tag that indicates the cell barcode associated with each right read.
 
 ```
-samtools view output_dropseq/pbmc4k_sample_unaligned_cell.bam | head
+samtools view output_dropseq/lung1_sample_unaligned_cell.bam | head
 ```
 
 #### 1.3 TagBamWithReadSequenceExtended
 
-We then repeat the same procedure to extract the molecule identifier (UMI) located in bases 17-26 of the left read.
+We then repeat the same procedure to extract the 6 bp molecule identifier (UMI) located in bases 49-54 of the left read (for Chromium datasets the 10 bp UMI is located at bases 17-26). Since after this step we don't need the left anymore (we already extracted both the barcode and UMI), we set `DISCARD_READ=True` to remove the left reads from the bam file.
 
 ```
-TagBamWithReadSequenceExtended INPUT=output_dropseq/pbmc4k_sample_unaligned_cell.bam OUTPUT=output_dropseq/pbmc4k_sample_unaligned_cell_umi.bam SUMMARY=output_dropseq/pbmc4k_sample_unaligned_cell_umi.bam_summary.txt BASE_RANGE=17-26 BASE_QUALITY=10 BARCODED_READ=1 DISCARD_READ=True TAG_NAME=XM NUM_BASES_BELOW_QUALITY=1
+TagBamWithReadSequenceExtended INPUT=output_dropseq/lung1_sample_unaligned_cell.bam OUTPUT=output_dropseq/lung1_sample_unaligned_cell_umi.bam SUMMARY=output_dropseq/lung1_sample_unaligned_cell_umi.bam_summary.txt BASE_RANGE=49-54 BASE_QUALITY=10 BARCODED_READ=1 DISCARD_READ=True TAG_NAME=XM NUM_BASES_BELOW_QUALITY=1
 ```
 
 Notice the added *XM* tag in the right reads. At this point we also discard all left reads, since we don't need any more information from them.
 
 ```
-samtools view output_dropseq/pbmc4k_sample_unaligned_cell_umi.bam | head
+samtools view output_dropseq/lung1_sample_unaligned_cell_umi.bam | head
 ```
 
 #### 1.4 FilterBAM
 
-In the previous steps, an additional *XM* tag was also added to reads that have at least one bad quality base in the barcode or UMI sequence. Here we filter the bam file by removing these low-confidence reads.
+In the previous steps, an additional *XQ* tag was also added to reads that have at least one bad quality base in the barcode or UMI sequence (below Q 10). Here we filter the bam file by removing these low-confidence reads.
 
 ```
-FilterBAM TAG_REJECT=XQ INPUT=output_dropseq/pbmc4k_sample_unaligned_cell_umi.bam OUTPUT=output_dropseq/pbmc4k_sample_unaligned_filtered.bam
+FilterBAM TAG_REJECT=XQ INPUT=output_dropseq/lung1_sample_unaligned_cell_umi.bam OUTPUT=output_dropseq/lung1_sample_unaligned_filtered.bam
 ```
 
 #### 1.5 Trim polyA
 
-Some scRNA-seq protocols, such as the Chromium System, sequence only the 3' ends of captured mRNA molecules. Thus, it is common for this sequence to contain part of the poly-A tail of the mRNas. Here trim the reads in order to remove poly-A tails.
+Some scRNA-seq protocols, such as the Chromium System and this Microwell-seq dataset, sequence only the 3' ends of captured mRNA molecules. Thus, it is common for this sequence to contain part of the poly-A tail of the mRNAs. To facilitate the mapping procedure we trim the reads in order to remove poly-A tails.
 
 ```
-PolyATrimmer INPUT=output_dropseq/pbmc4k_sample_unaligned_filtered.bam OUTPUT=output_dropseq/pbmc4k_sample_unaligned_filtered_trimmed.bam OUTPUT_SUMMARY=output_dropseq/pbmc4k_sample_unaligned_filtered_trimmed.bam_summary.txt MISMATCHES=0 NUM_BASES=6
+PolyATrimmer INPUT=output_dropseq/lung1_sample_unaligned_filtered.bam OUTPUT=output_dropseq/lung1_sample_unaligned_filtered_trimmed.bam OUTPUT_SUMMARY=output_dropseq/lung1_sample_unaligned_filtered_trimmed.bam_summary.txt MISMATCHES=0 NUM_BASES=6
+```
+
+A report is also produced showing the sizes of the removed poly-A tails.
+
+```
+cat output_dropseq/lung1_sample_unaligned_filtered_trimmed.bam_summary.txt
 ```
 
 #### 1.6. SamToFastq
@@ -327,29 +335,23 @@ PolyATrimmer INPUT=output_dropseq/pbmc4k_sample_unaligned_filtered.bam OUTPUT=ou
 Finally, after the preprocessing steps are completed, we can convert the sam/bam back to FastQ format in order to proceed with the analysis.
 
 ```
-picard-tools SamToFastq INPUT=output_dropseq/pbmc4k_sample_unaligned_filtered_trimmed.bam FASTQ=output_dropseq/pbmc4k_sample_unaligned_filtered_trimmed.fastq
-```
-
-It is good practice to generate a FastQC report at this point, in order to evaluate the impact of these preprocessing steps on the sample.
-
-```
-fastqc output_dropseq/pbmc4k_sample_unaligned_filtered_trimmed.fastq
+java -jar software/picard.jar SamToFastq INPUT=output_dropseq/lung1_sample_unaligned_filtered_trimmed.bam FASTQ=output_dropseq/lung1_sample_unaligned_filtered_trimmed.fastq
 ```
 
 ### 2. Alignment
 
 At this point we have generated **two** important files that are essential to proceed with the analysis:
 
-- `output_dropseq/pbmc4k_sample_unaligned_filtered_trimmed.fastq`: this contains just the mRNA sequences in standard FastQ format and can be used for mapping.
-- `output_dropseq/pbmc4k_sample_unaligned_filtered_trimmed.bam`: this contains both the mRNA sequences as well as the associated cell barcode and unique molecule idenfier for each read.
+- `output_dropseq/lung1_sample_unaligned_filtered_trimmed.fastq`: this contains just the mRNA sequences in standard FastQ format and can be used for mapping.
+- `output_dropseq/lung1_sample_unaligned_filtered_trimmed.bam`: this contains both the mRNA sequences as well as the associated cell barcode and unique molecule idenfier for each read.
 
 #### 2.1 STAR
 
-We are now ready to map the reads to a reference genome or transcriptome. Here we use the [STAR](https://github.com/alexdobin/STAR) aligner to map the reads to human chromosome 1. We use the same reference files used for `cellranger`.
+We are now ready to map the reads to a reference genome or transcriptome. Here we use the [STAR](https://github.com/alexdobin/STAR) aligner to map the reads to the mouse genome (mm10). The genome must be properly indexed to use with with STAR. Here we are using a pre-indexed genome that was downloaded from the 10x Genomics website (https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest).
 
 ```
 mkdir -p output_dropseq/STAR
-STAR --runThreadN 8 --genomeDir ../reference/GRCh38_1/star --readFilesIn output_dropseq/pbmc4k_sample_unaligned_filtered_trimmed.fastq --outFileNamePrefix output_dropseq/STAR/star --outSAMtype BAM SortedByCoordinate
+software/STAR-2.6.1b/bin/Linux_x86_64/STAR --runThreadN 8 --genomeDir reference/refdata-cellranger-mm10-1.2.0/star --readFilesIn output_dropseq/lung1_sample_unaligned_filtered_trimmed.fastq --outFileNamePrefix output_dropseq/STAR/star --outSAMtype BAM SortedByCoordinate
 ```
 
 A summary of the mapping procedure is provided.
@@ -363,9 +365,9 @@ cat output_dropseq/STAR/starLog.final.out
 Now the file `starAligned.sortedByCoord.out.bam` contains the aligned reads. However, in the process we lost the information about the cell barcodes and UMI. We can still recover this information from the unaligned bam file we generated previously. In the following commands we merge the information from the unaligned bam file with the newly generated alignments.
 
 ```
-picard-tools SortSam I=output_dropseq/STAR/starAligned.sortedByCoord.out.bam O=output_dropseq/STAR/starAligned.sortedByQueryname.bam SORT_ORDER=queryname
-picard-tools CreateSequenceDictionary REFERENCE=../reference/GRCh38_1/fasta/genome.fa OUTPUT=../reference/GRCh38_1/fasta/genome.dict
-picard-tools MergeBamAlignment REFERENCE_SEQUENCE=../reference/GRCh38_1/fasta/genome.fa UNMAPPED_BAM=output_dropseq/pbmc4k_sample_unaligned_filtered_trimmed.bam ALIGNED_BAM=output_dropseq/STAR/starAligned.sortedByQueryname.bam OUTPUT=output_dropseq/starAligned.merged.bam INCLUDE_SECONDARY_ALIGNMENTS=false PAIRED_RUN=false
+java -jar software/picard.jar SortSam I=output_dropseq/STAR/starAligned.sortedByCoord.out.bam O=output_dropseq/STAR/starAligned.sortedByQueryname.bam SORT_ORDER=queryname
+java -jar software/picard.jar CreateSequenceDictionary REFERENCE=reference/refdata-cellranger-mm10-1.2.0/fasta/genome.fa OUTPUT=reference/refdata-cellranger-mm10-1.2.0/fasta/genome.dict
+java -jar software/picard.jar MergeBamAlignment REFERENCE_SEQUENCE=reference/refdata-cellranger-mm10-1.2.0/fasta/genome.fa UNMAPPED_BAM=output_dropseq/lung1_sample_unaligned_filtered_trimmed.bam ALIGNED_BAM=output_dropseq/STAR/starAligned.sortedByQueryname.bam OUTPUT=output_dropseq/starAligned.merged.bam INCLUDE_SECONDARY_ALIGNMENTS=false PAIRED_RUN=false
 ```
 
 Notice we have now recovered and associated the cell barcodes and UMI to each aligned read through the *XC* and *XM* tags.
@@ -374,9 +376,9 @@ Notice we have now recovered and associated the cell barcodes and UMI to each al
 samtools view output_dropseq/starAligned.merged.bam | head
 ```
 
-#### 2.4 BAMTagHistogram (optional)
+#### 2.4 BAMTagHistogram
 
-The following command can be used to generate a histogram of absolute number of reads per cell barcode.
+The following command can be used to generate a histogram of absolute number of reads per cell barcode. This allows us to make a first (rough) estimate of the number of cells in our dataset.
 
 ```
 BAMTagHistogram I=output_dropseq/starAligned.merged.bam O=output_dropseq/read_counts.txt TAG=XC
@@ -386,23 +388,23 @@ In **RStudio** set your working directory to the dropseq project directory, and 
 
 ```R
 read.counts <- read.table("output_dropseq/read_counts.txt")
-plot(tab[,1], type="l", log="xy", xlab="Barcodes", ylab="# of reads")
-abline(v=4000, lty="dashed")
+plot(read.counts[,1], type="l", log="xy", xlab="Barcodes", ylab="# of reads")
+abline(v=c(5000, 10000), lty="dashed")
 ```
 ![](images/dropseq-barcodes.png)
 
-As expected, we notice a sharp drop after around 4,000 barcodes.
+There appears to be an inflexion point in the number of mapped reads after the first 5,000 to 10,000 barcodes. We can use the latter as an upper-limit on the estimated number of cells in the dataset.
 
 ### 3. Counting
 
-We are now ready to proceed to the UMI counting step. If we wanted to quantify raw reads per gene, we could now simply use a program like `featureCounts` or `htseq-count`. However, because we want to count unique *UMIs* we need to perform the calculation in two steps: 1. first we tag each read with the gene it overlaps (if any), and 2. we count unique UMIs for each gene.
+We are now ready to proceed to the UMI counting step. If we wanted to quantify raw reads per gene, we could now simply use a program like `featureCounts` or `htseq-count`. However, because we want to count unique molecules (based on UMIs) we need to perform the calculation in two steps: 1. first we tag each read with the gene it overlaps (if any), and 2. we count unique UMIs for each gene (i.e. the number of different UMIs).
 
 #### 3.1 TagReadWithGeneExon
 
 We add a bam tag to each mapped read indicating if that read is overlapping any annotated exon.
 
 ```
-TagReadWithGeneExon I=output_dropseq/starAligned.merged.bam O=output_dropseq/starAligned.merged.exons.bam ANNOTATIONS_FILE=../reference/GRCh38_1/genes/genes.gtf TAG=GE
+TagReadWithGeneExon I=output_dropseq/starAligned.merged.bam O=output_dropseq/starAligned.merged.exons.bam ANNOTATIONS_FILE=reference/refdata-cellranger-mm10-1.2.0/genes/genes.gtf TAG=GE
 ```
 
 Reads overlapping exons will be tagged with a *GE* tag:
@@ -413,57 +415,17 @@ samtools view output_dropseq/starAligned.merged.exons.bam | grep "GE:" | head
 
 ### 3.2 DigitalExpression
 
-Finally we count how many unique UMIs are associated with each gene and cell barcode. In the `DigitalExpression` command we indicate the names of the tags we used for cell barcodes, UMIs and exons. We also indicate how many barcodes/cells we wish to report in the UMI matrix (in this case 4000 cells).
+Finally we count how many unique UMIs are associated with each gene and cell barcode. In the `DigitalExpression` command we indicate the names of the tags we used for cell barcodes, UMIs and exons. We also indicate how many barcodes/cells we wish to report in the UMI matrix. Because this command will generate a standard *csv* file (as opposed to a sparse matrix format), it is important not ask for a very large number of barcodes. In this case, we will use our upper-limit estimation of 10,000 cells from step 2.4.
 
 ```
-DigitalExpression I=output_dropseq/starAligned.merged.exons.bam O=output_dropseq/pbmc4k_sample.dge.txt.gz SUMMARY=output_dropseq/pbmc4k_sample.dge.summary.txt CELL_BARCODE_TAG=XC MOLECULAR_BARCODE_TAG=XM GENE_EXON_TAG=GE NUM_CORE_BARCODES=4000
+DigitalExpression I=output_dropseq/starAligned.merged.exons.bam O=output_dropseq/lung1_sample.dge.txt.gz SUMMARY=output_dropseq/lung1_sample.dge.summary.txt CELL_BARCODE_TAG=XC MOLECULAR_BARCODE_TAG=XM GENE_EXON_TAG=GE NUM_CORE_BARCODES=10000
 ```
 
 This command will generate an UMI count matrix (in standard tabular format). Because this matrix file can be quite big, it is compressed with `gzip`.
 
-## Comparison of both methods
+## Downstream analysis with R
 
-**Task**: In **RStudio** set the working directory to `count_practical` and run the commands below.
-
-Load the `Matrix` package to work with `cellranger` sparse matrices.
-
-```R
-library(Matrix)
-```
-
-Import the Drop-seq UMI count matrix.
-
-```R
-mat_ds <- read.table(gzfile("output_dropseq/pbmc4k_sample.dge.txt.gz"), header=TRUE)
-rownames(mat_ds) <- make.unique(as.character(mat_ds$GENE))
-mat_ds[, 1] <- NULL
-mat_ds <- Matrix(as.matrix(mat_ds))
-```
-
-Import the `cellranger` UMI count matrix.
-
-```R
-mat_cr <- readMM(file = "output_cellranger/outs/filtered_gene_bc_matrices/GRCh38_1/matrix.mtx")
-genes <- read.table("output_cellranger/outs/filtered_gene_bc_matrices/GRCh38_1/genes.tsv")
-barcodes <- read.table("output_cellranger/outs/filtered_gene_bc_matrices/GRCh38_1/barcodes.tsv")
-rownames(mat_cr) <- make.unique(as.character(genes[, 2]))
-colnames(mat_cr) <- barcodes[, 1]
-```
-
-Make a plot of the total UMI counts for genes appearing in both matrices.
-
-```R
-common.genes <- intersect(rownames(mat_ds), rownames(mat_cr))
-total_ds <- rowSums(mat_ds)[ common.genes ]
-total_cr <- rowSums(mat_cr)[ common.genes ]
-
-plot(total_ds, total_cr, log="xy", pch=20, xlab="UMI counts (Drop-seq tools)", ylab="UMI counts (CellRanger)")
-abline(0, 1, lty="dashed", col="grey")
-```
-
-![](images/dropseq_vs_cellranger.png)
-
-## List of R practical exercises
+Packages used: [seurat](https://satijalab.org/seurat/), [scater](https://bioconductor.org/packages/release/bioc/html/scater.html), [SC3](https://bioconductor.org/packages/release/bioc/html/SC3.html).
 
 ### Quality control and downstream analysis of pbmc4k using Seurat
 
@@ -473,6 +435,8 @@ abline(0, 1, lty="dashed", col="grey")
 - Clustering
 - Visualization with t-SNE
 - Identification of marker genes (differential expression)
+
+
 
 ### Quality control and downstream analysis of pbmc4k using scater and s3c
 
