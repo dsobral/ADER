@@ -141,11 +141,6 @@ sobj <- FilterCells(sobj, subset.names = "percent.mito", high.thresholds = 0.1)
 dim(sobj@data)
 ```
 
-```{r}
-
-```
-
-
 # Normalization
 
 We need to normalize each cell for the total UMI counts for that cells. This normalization assumes that the total amount of RNA molecules in each cell is similar. We also log-transform the UMI counts and scale them to the median UMI counts across all cells.
@@ -214,35 +209,32 @@ props <- eigs / sum(eigs)
 plot(props, ylab="Proportion of variance", xlab="Principal Component")
 ```
 
+We can also vizualize top genes associated with each PCA (i.e. which are the genes that are driving the heterogeneity of the data). The `VizPCA` function plots the scores of the most extreme genes for each PC. The `PCHeatmap` shows a heatmap of the expression of these genes across cells.
+
+```{r, fig.width=8, fig.height=12}
+VizPCA(sobj, pcs.use = 1:15, do.balanced = TRUE)
+PCHeatmap(sobj, pc.use = 1:15, cells.use = 500, do.balanced = TRUE, label.columns = FALSE)
+```
+
 **Question**: Based on the above plots, how many principal components would you consider for further analysis.
 
 <details><summary>Click Here to see the answer</summary>
 There is a drop in the percentage of variance explained after PC15 and the plot seems to reach saturation after approximately 20 PCs. Thus, 15 to 20 PCs seem to be adequate for this dataset.
 </details>
 
-```{r, fig.width=8, fig.height=12}
-PCHeatmap(sobj, pc.use = 1:15, cells.use = 500, do.balanced = TRUE, label.columns = FALSE)
-```
-
-```{r, fig.width=8, fig.height=12}
-VizPCA(sobj, pcs.use = 1:15, do.balanced = TRUE)
-```
-
 ```{r}
-sobj <- JackStraw(sobj, num.pc = 40, num.replicate = 50, do.par=TRUE, display.progress = FALSE)
-sobj <- JackStrawPlot(sobj, PCs = 1:40)
-
-plot(1:40, -log10(sobj@dr$pca@jackstraw@overall.p.values[,2]))
-abline(h=-log10(0.05))
+# sobj <- JackStraw(sobj, num.pc = 40, num.replicate = 50, do.par=TRUE, display.progress = FALSE)
+# sobj <- JackStrawPlot(sobj, PCs = 1:40)
+# 
+# plot(1:40, -log10(sobj@dr$pca@jackstraw@overall.p.values[,2]))
+# abline(h=-log10(0.05))
 ```
-
-
 
 # Clustering
 
 Because of the high dimensionality of scRNA-seq datasets, clustering algorithms face a number of challenges, such as high computation times and memory requirements. To alieviate these problems, one solution is to perform the clustering using the cells PCA scores instead of the full expression matrix. Here each principal component represents a ...
 
-`Seurat` uses a graph based clustering algorithm (SNN). The `resolution` parameter influences the granularity of the clusters, with higher values producing more and smaller clusters.
+`Seurat` uses a graph based clustering algorithm. The `resolution` parameter influences the granularity of the clusters, with higher values producing more and smaller clusters.
 
 ```{r clusters, fig.width=8, fig.height=4}
 sobj <- FindClusters(sobj, reduction.type = "pca", dims.use = 1:15, 
@@ -252,19 +244,6 @@ p1 <- PCAPlot(sobj, dim.1 = 1, dim.2 = 2, do.return=TRUE)
 p2 <- PCAPlot(sobj, dim.1 = 2, dim.2 = 3, do.return=TRUE)
 grid.arrange(p1, p2, ncol=2)
 ```
-
-```{r, fig.width=10, fig.height=10}
-mdf <- reshape2::melt(sobj@dr$pca@cell.embeddings[, 1:12], varnames=c("Barcode", "PC"))
-mdf$Cluster <- sobj@ident[ match(mdf$Barcode, names(sobj@ident)) ]
-
-ggplot(mdf, aes(x=value, col=mdf$Cluster)) + geom_density() + facet_wrap(~PC, nrow = 4)
-```
-
-
-```{r}
-#saveRDS(sobj@ident, file="seurat_clusters.Rds")
-```
-
 
 # Visualizing clusters with a t-SNE plot
 
@@ -286,20 +265,6 @@ For scRNA-seq datasets, a `perplexity` value in the range of  20 to 50 usually p
 ```{r tsne}
 sobj <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE)
 TSNEPlot(sobj, do.label = TRUE)
-```
-
-Other clustering methods.
-
-```{r}
-# library(dynamicTreeCut)
-# 
-# dists <- dist(sobj@data)
-# 
-# cl2 <- hclust()
-# 
-# 
-# sobj <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE)
-# TSNEPlot(sobj, do.label = TRUE)
 ```
 
 # Finding marker genes

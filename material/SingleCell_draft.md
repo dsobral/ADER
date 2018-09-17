@@ -97,7 +97,7 @@ In this tutorial, we will go through the basic steps of a *single sample* single
 
 ### LO XX: Use `cellranger` to obtain an UMI count matrix for a 10x dataset
 
-For this task we will use an example dataset from avalable at the 10x Genomics website.
+For this task we will use an example dataset available from the 10x Genomics website.
 
 > [**4k PBMCs from a Healthy Donor**](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/hgmm_100).
 
@@ -440,4 +440,4 @@ Packages used: [seurat](https://satijalab.org/seurat/)
 
 ## Practice: Downstream analysis of PBMC4k dataset using Seurat
 
-**TASK**: Using what you learned, perform on your own a downstream analysis of the PBMC4k 10x dataset. Use the following document as a guide, but try to perform the analysis steps on your own, by modifying the commands used in the previous tutorial: [Analysis of PBMC4k using Seurat](singlecell_practical/tutorial-seurat-pbmc4k.md).
+**TASK**: Using what you learned, perform on your own a downstream analysis of the PBMC4k 10x dataset. Use the following document as a guide, but try to perform the analysis steps on your own, by modifying the commands used in the previous tutorial: [Analysis of PBMC4k using Seurat](singlecell_practical/exercise-seurat-pbmc4k.md).
