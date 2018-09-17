@@ -436,8 +436,8 @@ Packages used: [seurat](https://satijalab.org/seurat/)
 - Visualization with t-SNE
 - Identification of marker genes (differential expression)
 
-**TASK**: Open RStudio on your computer. Using the R console, perform the steps described in this document: [Analysis of Mouse Cell Atlas scRNA-seq using Seurat](tutorial-seurat-mca.md).
+**TASK**: Open RStudio on your computer. Using the R console, perform the steps described in this document: [Analysis of Mouse Cell Atlas scRNA-seq using Seurat](singlecell_practical/tutorial-seurat-mca.md).
 
 ## Practice: Downstream analysis of PBMC4k dataset using Seurat
 
-**TASK**: Using what you learned, perform on your own a downstream analysis of the PBMC4k 10x dataset. Use the following document as a guide, but try to perform the analysis steps on your own, by modifying the commands used in the previous tutorial: [Analysis of PBMC4k using Seurat](tutorial-seurat-pbmc4k.md).
+**TASK**: Using what you learned, perform on your own a downstream analysis of the PBMC4k 10x dataset. Use the following document as a guide, but try to perform the analysis steps on your own, by modifying the commands used in the previous tutorial: [Analysis of PBMC4k using Seurat](singlecell_practical/tutorial-seurat-pbmc4k.md).
