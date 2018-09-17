@@ -42,7 +42,7 @@ Conceptually, the analysis of a scRNA-seq sample for the purpose of identifying 
 
 #### 1. Preprocessing
 
-As in bulk RNA-seq, FastQ files preprocessed in order to remove adapter sequences and low quality nucleotides.
+As in bulk RNA-seq, FastQ files preprocessed in order to remove adapter sequences and low quality nucleotides (from the RNA read only).
 
 *Cell barcodes* and *UMI* sequences are extracted from the first read in order to keep track of cells and unique molecules. Different strategies can be used to account for sequencing errors, such as collapsing *barcodes* or *UMIs* that only differ by a singe nucleotide.
 
@@ -95,11 +95,11 @@ In this tutorial, we will go through the basic steps of a *single sample* single
    - Cluster cell subpopulations.
    - Perform differential gene expression to determine subpopulation marker genes.
 
-### Example dataset
+### LO XX: Use `cellranger` to obtain an UMI count matrix for a 10x dataset
 
-We will use an example dataset from 10x.
+For this task we will use an example dataset from avalable at the 10x Genomics website.
 
-> **4k PBMCs from a Healthy Donor**
+> [**4k PBMCs from a Healthy Donor**](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/hgmm_100).
 
 > Peripheral blood mononuclear cells (PBMCs) from a healthy donor (same donor as pbmc8k). PBMCs are primary cells with relatively small amounts of RNA (~1pg RNA/cell).
 
@@ -107,16 +107,11 @@ We will use an example dataset from 10x.
 > - Sequenced on Illumina Hiseq4000 with approximately 87,000 reads per cell
 > - 26bp read1 (16bp Chromium barcode and 10bp UMI), 98bp read2 (transcript), and 8bp I7 sample barcode
 
-This dataset was prepared using Chromium Single Cell 3' v2 chemistry (https://support.10xgenomics.com/single-cell-gene-expression/index/doc/specifications-sequencing-requirements-for-single-cell-3) and sequenced on a Illumina Hiseq4000. It can be found here: [pbmc4k](https://support.10xgenomics.com/single-cell-gene-expression/datasets/2.1.0/hgmm_100). *Note: you don't need to download it now.*
+This dataset was obtained using Chromium Single Cell 3' v2 chemistry (https://support.10xgenomics.com/single-cell-gene-expression/index/doc/specifications-sequencing-requirements-for-single-cell-3) and sequenced on a Illumina Hiseq4000.
 
+We will also need a reference genome. Genomes for human and mouse, pre-indexed and ready to be used with the STAR aligner, can be also be downloaded from the 10x Genomics webite: https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest.
 
-We will also need a reference genome. Genomes for human and mouse can be found here: https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest.
-
-```
-cd reference
-wget http://cf.10xgenomics.com/supp/cell-exp/refdata-cellranger-GRCh38-1.2.0.tar.gz
-tar xzvf refdata-cellranger-GRCh38-1.2.0.tar.gz
-```
+*Note: In these task we will use a small subset the full dataset consisting of 1M reads, and a genome reference of just human chromosome 1, since the full dataset takes ~14 hours to process using 8 cores and 32Gb of RAM.*
 
 ### Evaluate sample quality
 
@@ -132,10 +127,6 @@ The forward reads are 26 bp long, and the reverse reads are 98 bp. The reverse r
 
 In a 10x dataset, the first (forward) read only contains the cell barcode and UMI, while the RNA sequence (from the 3' end) is on the second (reverse) read. In paired-end sequencing the second read usually has lower quality scores that the first (forward) read.
 </p></details><br/>
-
-### LO XX: Use `cellranger` to obtain an UMI count matrix
-
-*Note: In these task we will use a small subset the full dataset consisting of 1M reads, and a genome reference of just human chromosome 1, since the full dataset takes ~14 hours to process using 8 cores and 32Gb of RAM.*
 
 **Task**: Run the commands below to obtain UMI count matrices and a summary report using `cellranger count`.
 
@@ -155,10 +146,10 @@ source sourceme.bash
 Run `cellranger count` specifying the output folder id (--id), the transcriptome reference (--transcriptome), the folder containing the fastqs to process (--fastqs) and the name of the sample to process (--sample). It is recommended to also specify the approximate number of cells expected to be contained in the same (--expect-cells). To skip secondary analysis we add --nosecondary to the command.
 
 ```
-cellranger count --id=output_cellranger --transcriptome=reference/GRCh38_1 --fastqs=fastqs/pbmc4k_sample --sample=pbmc4k_sample --jobmode=local --localcores=8 --localmem=12 --expect-cells=4000 --nosecondary
+cellranger count --id=output_cellranger --transcriptome=reference/GRCh38_1 --fastqs=fastqs/pbmc4k_sample --sample=pbmc4k_sample --jobmode=local --localcores=8 --localmem=12 --expect-cells=4000
 ```
 
-### Understand the output of the `cellranger count` command
+### LOXXX: Understand the output of the `cellranger count` command
 
 Running the above commands will produce the following files in the `output_cellranger/outs` directory:
 
@@ -391,9 +382,20 @@ read.counts <- read.table("output_dropseq/read_counts.txt")
 plot(read.counts[,1], type="l", log="xy", xlab="Barcodes", ylab="# of reads")
 abline(v=c(5000, 10000), lty="dashed")
 ```
-![](images/dropseq-barcodes.png)
+![](images/dropseq-barcodes-sample.png)
 
-There appears to be an inflexion point in the number of mapped reads after the first 5,000 to 10,000 barcodes. We can use the latter as an upper-limit on the estimated number of cells in the dataset.
+**Task**: Modify the above R code using the read counts obtained from the full dataset. You can find the file in the `output_dropseq_full` directory.
+
+<details><summary>Click Here to see the solution</summary><p>
+```R
+read.counts <- read.table("output_dropseq_full/read_counts.txt")
+plot(read.counts[,1], type="l", log="xy", xlab="Barcodes", ylab="# of reads")
+abline(v=c(5000, 10000), lty="dashed")
+```
+![](images/dropseq-barcodes-full.png)
+</p></details><br/>
+
+There appears to be an inflexion point in the number of mapped reads after the first 5,000 to 10,000 barcodes. We can use the latter as a conservative upper-limit on the estimated number of cells in the dataset.
 
 ### 3. Counting
 
@@ -423,32 +425,19 @@ DigitalExpression I=output_dropseq/starAligned.merged.exons.bam O=output_dropseq
 
 This command will generate an UMI count matrix (in standard tabular format). Because this matrix file can be quite big, it is compressed with `gzip`.
 
-## Downstream analysis with R
+## LOXXX: Downstream analysis of MCA lung dataset using Seurat
 
-Packages used: [seurat](https://satijalab.org/seurat/), [scater](https://bioconductor.org/packages/release/bioc/html/scater.html), [SC3](https://bioconductor.org/packages/release/bioc/html/SC3.html).
+Packages used: [seurat](https://satijalab.org/seurat/)
 
-### Quality control and downstream analysis of pbmc4k using Seurat
-
-- Filtering
+- Filtering/ Feature selection
 - Normalization
 - Dimensionality reduction with PCA
 - Clustering
 - Visualization with t-SNE
 - Identification of marker genes (differential expression)
 
+**TASK**: Open RStudio on your computer. Using the R console, perform the steps described in this document: [Analysis of Mouse Cell Atlas scRNA-seq using Seurat](http://htmlpreview.github.io/?https://github.com/dsobral/ADER/blob/master/material/singlecell_practical/tutorial-seurat-mca.html).
 
+## Practice: Downstream analysis of PBMC4k dataset using Seurat
 
-### Quality control and downstream analysis of pbmc4k using scater and s3c
-
-- Quality control
-- Normalization
-- Dimensionality reduction with PCA
-- Clustering
-- Visualization with t-SNE
-- Identification of marker genes (differential expression)
-
-### Multiplet estimation using mixed species dataset
-
-- Import and join the two matrices
-- Compare counts for both species
-- Estimate multiplet rate
+**TASK**: Using what you learned, perform on your own a downstream analysis of the PBMC4k 10x dataset. Use the following document as a guide, but try to perform the analysis steps on your own, by modifying the commands used in the previous tutorial: [Analysis of PBMC4k using Seurat](http://htmlpreview.github.io/?https://github.com/dsobral/ADER/blob/master/material/singlecell_practical/exercise-seurat-pbmc4k.html).
