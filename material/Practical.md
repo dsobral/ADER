@@ -410,14 +410,14 @@ You can see several files, all starting with 'Drosophila_melanogaster.BDGP6.dna.
 <br/>
 <br/>
 
-**TASK**: After the genome indexing step, you can now perform the alignment. Make sure the file 20150821.A-2_BGVR_P218_R1.sample.fastq.gz that is inside the fastq_examples folder is in the same folder as your genome index. Now, run the following command: ```hisat2 -x Drosophila_melanogaster.BDGP6.dna.toplevel.hisat2 -U 20150821.A-2_BGVR_P218_R1.sample.fastq.gz > 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sam```. 
+**TASK**: After the genome indexing step, you can now perform the alignment. Make sure the file 20150821.A-2_BGVR_P218_R1.sample.fastq.gz that is inside the fastq_examples folder is in the same folder as your genome index. Now, run the following command: ```hisat2 -x Drosophila_melanogaster.BDGP6.dna.toplevel.hisat2 -U 20150821.A-2_BGVR_P218_R1.sample.fastq.gz > 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sam```.
 <br/>
 
 This step generated a SAM file, containing the alignment information like we saw before.
 
-**TASK**: We will now transform the SAM file into a BAM file. In the same terminal window where you indexed the genomeand performed the alignment using Hisat, run ```samtools view -Sb 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sam > 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.bam```. 
+**TASK**: We will now transform the SAM file into a BAM file. In the same terminal window where you indexed the genomeand performed the alignment using Hisat, run ```samtools view -Sb 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sam > 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.bam```.
 
-The BAM file contains exactly the same information as the SAM file, but compressed (like a zip file). Like the SAM file, the BAM file contains information on millions of alignments. For many applications, we need to efficiently extract the alignments in certain regions of the genome (eg. the genes). For this, we can create a BAM index (NOT to be confused with the genome index), which acts like yellow pages to efficiently direct software tools to alignments in specific regions of the genome. 
+The BAM file contains exactly the same information as the SAM file, but compressed (like a zip file). Like the SAM file, the BAM file contains information on millions of alignments. For many applications, we need to efficiently extract the alignments in certain regions of the genome (eg. the genes). For this, we can create a BAM index (NOT to be confused with the genome index), which acts like yellow pages to efficiently direct software tools to alignments in specific regions of the genome.
 
 **TASK**: To create the BAM index, the alignments in the bam file need to be sorted by position. For this, run ```samtools sort 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.bam -o 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam```. Finally, we can create the index ```samtools index 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam```. Notice now the appearance of a companion file 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam.bai that contains the index. This file should always accompany its corresponding bam file, as programs will look for the existence of this file.
 <br/>
@@ -720,7 +720,7 @@ But even to compare the same gene between samples, this first normalization is u
 
 If we assume that most genes are not differentially expressed, then the ratio of counts between samples should be the same for most genes. This assumption is the basis for many types of normalization steps. One simple process consists of obtaining a reference sample where each gene counts is the mean of that gene counts in all samples. Then, for each sample, calculate the ratio of each gene count against the gene count in the reference. For most genes, this ratio should be 1 (under our initial assumption). Therefore, the median (to avoid the issue of outliers) can be used as a sample specific normalization factor.
 
-After normalization, the next step is to apply a statistical test for differential expression. For this we need to make a model, usually based on a statistical distribution. Given that sequencing data is based on discrete counts, most of these popular methods are based on derivations of the binomial distribution. For most experiments, the distribution that seems to fit best distribution of normalized gene expression is the negative binomial. 
+After normalization, the next step is to apply a statistical test for differential expression. For this we need to make a model, usually based on a statistical distribution. Given that sequencing data is based on discrete counts, most of these popular methods are based on derivations of the binomial distribution. For most experiments, the distribution that seems to fit best distribution of normalized gene expression is the negative binomial.
 
 After normalization, we need to estimate the parameters of the distribution, as well as variance in those parameters, namely how much the (normalized) counts vary between the different samples. This variation is clearly gene dependent, since highly expressed genes vary more in terms of absolute value, and low expressed genes vary more in terms of % of gene expression (fold change). If one only looks at fold change without taking variation into account, we’re more likely to have low expressed genes as differentially expressed. Therefore, we need to accurately estimate variation per gene. But usually we have a limited number of replicates, insufficient for the accurate estimation of parameters. We thus need to find a way to produce such estimates, and we need specialized tools to do it.
 
@@ -730,7 +730,7 @@ DESeq applies the normalization with the median of the ratio of gene expression 
 
 To estimate variances, a strategy that is used by edgeR and DESeq2 is to bin genes with similar expression and fit a curve, assuming that genes with similar expression have a similar variance. The parameter used to define the curve is then used as a baseline to reestimate the "true" difference of gene expression between groups of samples. Finally, the assumption that most genes are not differentially expressed is also used to rescale the variance, namely by making it constant at all bin levels.
 
-![DESeq2 Dispersion](images/deseq2_dispersion.jpg) 
+![DESeq2 Dispersion](images/deseq2_dispersion.jpg)
 
 ![LFC reestimation](images/reestimated_lfc.jpg)
 
@@ -927,7 +927,7 @@ In the original case with all samples, there are 752 genes with adjusted p-value
   * Could you interpret the results coming from DESeq2?
 
   * Did you understand how to identify issues like paired data and batch effects and how to handle them using DESeq2?
-  
+
 
 <br/>
 <br/>
@@ -953,7 +953,7 @@ The final example we will explore contains several factors, and one of the facto
 **TASK**: In Rstudio, run edgeR_example4_GSE60450.R.
 
 
-**Hint**: The [edgeR manual](https://www.bioconductor.org/packages/devel/bioc/vignettes/edgeR/inst/doc/edgeRUsersGuide.pdf) is a very good source of information. 
+**Hint**: The [edgeR manual](https://www.bioconductor.org/packages/devel/bioc/vignettes/edgeR/inst/doc/edgeRUsersGuide.pdf) is a very good source of information.
 <br/>
 <br/>
 
@@ -1064,7 +1064,7 @@ We can reduce the number of tests perfomed by excluding unnecessary tests:
 Reducing the number of tests performed has the added benefit of reducing the multiple-test correction factor, which in the case of redundant tests would be artificially inflated (since the tests are fully dependent).
 
 We can also reduce the number of tests performed by using GO slims, which are "trimmed" version of GO with only broad terms, instead of using the full GO. Different GO slims are available for different taxa. Using GO slims will greatly simplify the results. However, it will also lead to substantial loss in specificity, and the enriched terms may be more generic than we would like. Furthermore, using GO slims requires first converting the GO annotations from full GO to GO slim (which you can do using GOSlimmer in Galaxy).
- 
+
 Instead of using GO slims, we may simplify/summarize the enrichment analysis results a posteriori, using one of three strategies:
 - The family-based clustering algorithm integrated into [GOEnrichment](https://github.com/DanFaria/GOEnrichment) which reduces complexity while keeping branch information, but loses some specificity
 -The semantic similarity-based [REVIGO](http://revigo.irb.hr/) tool, which not only loses specificity but may merge branches

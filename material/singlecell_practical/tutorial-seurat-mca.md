@@ -187,9 +187,6 @@ dim(sobj@data)
 ## [1] 13051  2671
 ```
 
-
-
-
 # Normalization
 
 We need to normalize each cell for the total UMI counts for that cells. This normalization assumes that the total amount of RNA molecules in each cell is similar. We also log-transform the UMI counts and scale them to the median UMI counts across all cells.
@@ -262,13 +259,13 @@ highest.mean <- head(rownames(hvginfo)[ order(-hvginfo$gene.mean) ])
 VlnPlot(sobj, features.plot = highest.dispersion, point.size.use=0.5)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
 
 ```r
 VlnPlot(sobj, features.plot = highest.mean, point.size.use=0.5)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-11-2.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-10-2.png)<!-- -->
 
 # Dimensional reduction
 
@@ -285,7 +282,7 @@ sobj <- ScaleData(object = sobj, vars.to.regress = c("nUMI", "percent.mito"))
 
 ```
 ## 
-## Time Elapsed:  14.9373333454132 secs
+## Time Elapsed:  15.6205270290375 secs
 ```
 
 ```
@@ -303,7 +300,7 @@ p2 <- PCAPlot(object = sobj, dim.1 = 2, dim.2 = 3, do.return=TRUE) + theme(legen
 grid.arrange(p1, p2, ncol=2)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
 
 The next question is how many of the top principal components (PCs) are we going to use for the purpose of clustering the cells. The first thing to look at is the PCA scree-plot, showing the proportion of variance explained by each component. We are looking for a "knee" in the plot, where additional PCs do not bring much more new information.
 
@@ -314,7 +311,7 @@ For this purpose, *Seurat* provides the function `PCElbowPlot`, that displays th
 PCElbowPlot(sobj, num.pc = 40)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 
 We can also calculate the proportion of variance ourselves and plot it (the two representations are proportional to each other).
 
@@ -325,7 +322,22 @@ props <- eigs / sum(eigs)
 plot(props, ylab="Proportion of variance", xlab="Principal Component")
 ```
 
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+
+We can also vizualize top genes associated with each PCA (i.e. which are the genes that are driving the heterogeneity of the data). The `VizPCA` function plots the scores of the most extreme genes for each PC. The `PCHeatmap` shows a heatmap of the expression of these genes across cells.
+
+
+```r
+VizPCA(sobj, pcs.use = 1:15, do.balanced = TRUE)
+```
+
 ![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+
+```r
+PCHeatmap(sobj, pc.use = 1:15, cells.use = 500, do.balanced = TRUE, label.columns = FALSE)
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-14-2.png)<!-- -->
 
 **Question**: Based on the above plots, how many principal components would you consider for further analysis.
 
@@ -335,52 +347,18 @@ There is a drop in the percentage of variance explained after PC15 and the plot 
 
 
 ```r
-PCHeatmap(sobj, pc.use = 1:15, cells.use = 500, do.balanced = TRUE, label.columns = FALSE)
+# sobj <- JackStraw(sobj, num.pc = 40, num.replicate = 50, do.par=TRUE, display.progress = FALSE)
+# sobj <- JackStrawPlot(sobj, PCs = 1:40)
+# 
+# plot(1:40, -log10(sobj@dr$pca@jackstraw@overall.p.values[,2]))
+# abline(h=-log10(0.05))
 ```
-
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
-
-
-```r
-VizPCA(sobj, pcs.use = 1:15, do.balanced = TRUE)
-```
-
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
-
-
-```r
-sobj <- JackStraw(sobj, num.pc = 40, num.replicate = 50, do.par=TRUE, display.progress = FALSE)
-```
-
-```
-## Warning in JackStraw(sobj, num.pc = 40, num.replicate = 50, do.par =
-## TRUE, : do.par set to TRUE but num.cores set to 1. Setting num.cores to 6.
-```
-
-```r
-sobj <- JackStrawPlot(sobj, PCs = 1:40)
-```
-
-```
-## Warning: Removed 28512 rows containing missing values (geom_point).
-```
-
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
-
-```r
-plot(1:40, -log10(sobj@dr$pca@jackstraw@overall.p.values[,2]))
-abline(h=-log10(0.05))
-```
-
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-17-2.png)<!-- -->
-
-
 
 # Clustering
 
 Because of the high dimensionality of scRNA-seq datasets, clustering algorithms face a number of challenges, such as high computation times and memory requirements. To alieviate these problems, one solution is to perform the clustering using the cells PCA scores instead of the full expression matrix. Here each principal component represents a ...
 
-`Seurat` uses a graph based clustering algorithm (SNN). The `resolution` parameter influences the granularity of the clusters, with higher values producing more and smaller clusters.
+`Seurat` uses a graph based clustering algorithm. The `resolution` parameter influences the granularity of the clusters, with higher values producing more and smaller clusters.
 
 
 ```r
@@ -393,23 +371,6 @@ grid.arrange(p1, p2, ncol=2)
 ```
 
 ![](tutorial-seurat-mca_files/figure-html/clusters-1.png)<!-- -->
-
-
-```r
-mdf <- reshape2::melt(sobj@dr$pca@cell.embeddings[, 1:12], varnames=c("Barcode", "PC"))
-mdf$Cluster <- sobj@ident[ match(mdf$Barcode, names(sobj@ident)) ]
-
-ggplot(mdf, aes(x=value, col=mdf$Cluster)) + geom_density() + facet_wrap(~PC, nrow = 4)
-```
-
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
-
-
-
-```r
-#saveRDS(sobj@ident, file="seurat_clusters.Rds")
-```
-
 
 # Visualizing clusters with a t-SNE plot
 
@@ -435,21 +396,6 @@ TSNEPlot(sobj, do.label = TRUE)
 ```
 
 ![](tutorial-seurat-mca_files/figure-html/tsne-1.png)<!-- -->
-
-Other clustering methods.
-
-
-```r
-# library(dynamicTreeCut)
-# 
-# dists <- dist(sobj@data)
-# 
-# cl2 <- hclust()
-# 
-# 
-# sobj <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE)
-# TSNEPlot(sobj, do.label = TRUE)
-```
 
 # Finding marker genes
 
@@ -488,13 +434,13 @@ markers.0 <- markers[ which(markers$cluster == 0), ]
 FeaturePlot(sobj, features.plot = head(rownames(markers.0)), cols.use = c("grey", "blue"), reduction.use = "tsne")
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
 ```r
 VlnPlot(sobj, features.plot = head(rownames(markers.0)), point.size.use=0.5)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-23-2.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-18-2.png)<!-- -->
 
 **Exercise**: Modify the commands above to plot the top markers of cluster 8.
 
@@ -506,13 +452,13 @@ markers.8 <- markers[ which(markers$cluster == 8), ]
 FeaturePlot(sobj, features.plot = head(rownames(markers.8)), cols.use = c("grey", "blue"), reduction.use = "tsne")
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
 
 ```r
 VlnPlot(sobj, features.plot = head(rownames(markers.8)), point.size.use=0.5)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-24-2.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-19-2.png)<!-- -->
 
 </details>
 
@@ -524,7 +470,7 @@ top.markers <- do.call(rbind, lapply(split(markers, markers$cluster), head))
 DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key = TRUE)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
 
 **Question**: Based on the t-SNE visualization, and expression of marker genes represented in the above plots, do you think any of the clusters should be combined? If yes, which ones?
 
@@ -652,7 +598,7 @@ markers.8.9 <- FindMarkers(sobj, ident.1 = 8, ident.2 = 9, min.pct=0.25)
 FeaturePlot(sobj, features.plot = c("Dcn", "Cxcl14"), cols.use = c("grey", "blue"), reduction.use = "tsne")
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-28-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
 
 It appears that most differences between clusters 0, 1, 2 and 13 are due to mitochondrial RNA. Clusters 8 and 9 however display a larger amount of differentially expressed genes, and might represent different cell populations.
 
@@ -661,8 +607,42 @@ It appears that most differences between clusters 0, 1, 2 and 13 are due to mito
 We will merge clusters 0, 1, 2 and 13 into a single cluster.
 
 
+```r
+current.cluster.ids <- c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
+new.cluster.ids <- c(0,0,0,3,4,5,6,7,8,9,10,11,12,0,14,15)
+sobj@ident <- plyr::mapvalues(sobj@ident, from = current.cluster.ids, to = new.cluster.ids)
+```
 
-We will now compare our results to those from the pusblished study. To do so, we will import the annotated cell assignments and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the annotated cell assignments.
+And plot the t-SNE again to check the result.
+
+
+```r
+TSNEPlot(sobj, do.label = TRUE)
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
+
+Finally, we run the `FindAllMarkers` function again to account for the new clustering.
+
+
+```r
+markers <- FindAllMarkers(object = sobj, only.pos = TRUE, min.pct = 0.25, thresh.use = 0.25)
+markers <- markers[ markers$p_val_adj < 0.01, ]
+
+write.table(markers, file="lung1_markers_fixed.txt")
+```
+
+
+```r
+top.markers <- do.call(rbind, lapply(split(markers, markers$cluster), head))
+DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key = TRUE)
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-27-1.png)<!-- -->
+
+# Comparison with published results
+
+We will now compare our results to those from the pusblished study. To do so, we will import the annotated cell assignments from the study and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the annotated cell assignments.
 
 
 ```r
@@ -677,7 +657,6 @@ sobj@meta.data$AnnotationSimple <- gsub("_.*", "", sobj@meta.data$Annotation)
 ```
 
 
-
 ```r
 TSNEPlot(sobj, group.by="Annotation", do.label=TRUE, do.return=TRUE) + theme(legend.position = "none") 
 ```
@@ -686,7 +665,7 @@ TSNEPlot(sobj, group.by="Annotation", do.label=TRUE, do.return=TRUE) + theme(leg
 ## Warning: Removed 1 rows containing missing values (geom_text).
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-31-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-29-1.png)<!-- -->
 
 ```r
 TSNEPlot(sobj, group.by="AnnotationSimple", do.label=TRUE, do.return=TRUE) + theme(legend.position = "none") 
@@ -696,14 +675,26 @@ TSNEPlot(sobj, group.by="AnnotationSimple", do.label=TRUE, do.return=TRUE) + the
 ## Warning: Removed 1 rows containing missing values (geom_text).
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-31-2.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-29-2.png)<!-- -->
+
+We can compare our clustering result with the annotated cells by tabulating 
 
 
 ```r
-FeaturePlot(sobj, features.plot = "nUMI", no.legend=FALSE)
+library(corrplot)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-32-1.png)<!-- -->
+```
+## corrplot 0.84 loaded
+```
+
+```r
+cluster.comparison <- table(sobj@ident, sobj@meta.data$AnnotationSimple)
+corrplot(cluster.comparison, is.corr = FALSE, method = "number", col="blue")
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
+
 
 We can also reproduce figure 4D.
 
@@ -713,32 +704,7 @@ genes <- c("Sftpc", "Vwf", "Dcn", "Cxcl14")
 FeaturePlot(sobj, features.plot = genes, cols.use=c("grey", "red"), no.legend = FALSE)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-33-1.png)<!-- -->
-
-
-
-
-
-
-```r
-# sobj.p10 <- RunTSNE(object = sobj, dims.use = 1:20, do.fast = TRUE, perplexity=5)
-# plot.p10 <- TSNEPlot(object = sobj.p10, do.return=TRUE) + ggtitle("Perplexity 5")
-# 
-# sobj.p30 <- RunTSNE(object = sobj, dims.use = 1:20, do.fast = TRUE, perplexity=10)
-# plot.p30 <- TSNEPlot(object = sobj.p30, do.return=TRUE) + ggtitle("Perplexity 10")
-# 
-# sobj.p50 <- RunTSNE(object = sobj, dims.use = 1:20, do.fast = TRUE, perplexity=30)
-# plot.p50 <- TSNEPlot(object = sobj.p50, do.return=TRUE) + ggtitle("Perplexity 30")
-# 
-# sobj.p100 <- RunTSNE(object = sobj, dims.use = 1:20, do.fast = TRUE, perplexity=50)
-# plot.p100 <- TSNEPlot(object = sobj.p100, do.return=TRUE) + ggtitle("Perplexity 50")
-# 
-# grid.arrange(plot.p10, plot.p30, plot.p50, plot.p100)
-```
-
-
-
-
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-31-1.png)<!-- -->
 
 # Session Information
 
@@ -768,8 +734,8 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] bindrcpp_0.2.2 gridExtra_2.3  Seurat_2.3.3   Matrix_1.2-14 
-## [5] cowplot_0.9.2  ggplot2_2.2.1 
+## [1] corrplot_0.84  bindrcpp_0.2.2 gridExtra_2.3  Seurat_2.3.3  
+## [5] Matrix_1.2-14  cowplot_0.9.2  ggplot2_2.2.1 
 ## 
 ## loaded via a namespace (and not attached):
 ##   [1] tsne_0.1-3           segmented_0.5-3.0    nlme_3.1-137        

@@ -286,7 +286,7 @@ head(markers)
 
 Seurat provides several functions to visualize the expression of these genes. 
 
-```{r, fig.width=8, fig.height=6}
+```{r, fig.width=10, fig.height=8}
 markers.0 <- markers[ which(markers$cluster == 0), ]
 FeaturePlot(sobj, features.plot = head(rownames(markers.0)), cols.use = c("grey", "blue"), reduction.use = "tsne")
 
@@ -354,10 +354,34 @@ It appears that most differences between clusters 0, 1, 2 and 13 are due to mito
 We will merge clusters 0, 1, 2 and 13 into a single cluster.
 
 ```{r}
-
+current.cluster.ids <- c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
+new.cluster.ids <- c(0,0,0,3,4,5,6,7,8,9,10,11,12,0,14,15)
+sobj@ident <- plyr::mapvalues(sobj@ident, from = current.cluster.ids, to = new.cluster.ids)
 ```
 
-We will now compare our results to those from the pusblished study. To do so, we will import the annotated cell assignments and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the annotated cell assignments.
+And plot the t-SNE again to check the result.
+
+```{r}
+TSNEPlot(sobj, do.label = TRUE)
+```
+
+Finally, we run the `FindAllMarkers` function again to account for the new clustering.
+
+```{r}
+markers <- FindAllMarkers(object = sobj, only.pos = TRUE, min.pct = 0.25, thresh.use = 0.25)
+markers <- markers[ markers$p_val_adj < 0.01, ]
+
+write.table(markers, file="lung1_markers_fixed.txt")
+```
+
+```{r, fig.width=8, fig.height=12}
+top.markers <- do.call(rbind, lapply(split(markers, markers$cluster), head))
+DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key = TRUE)
+```
+
+# Comparison with published results
+
+We will now compare our results to those from the pusblished study. To do so, we will import the annotated cell assignments from the study and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the annotated cell assignments.
 
 ```{r}
 annotation <- read.table("reference/MCA_CellAssignments.csv", header=TRUE, sep=",")
@@ -370,15 +394,20 @@ sobj@meta.data$Annotation <- gsub("\\(Lung\\)", "", sobj@meta.data$Annotation)
 sobj@meta.data$AnnotationSimple <- gsub("_.*", "", sobj@meta.data$Annotation)
 ```
 
-
-```{r, fig.width=10, fig.height=8}
+```{r}
 TSNEPlot(sobj, group.by="Annotation", do.label=TRUE, do.return=TRUE) + theme(legend.position = "none") 
 TSNEPlot(sobj, group.by="AnnotationSimple", do.label=TRUE, do.return=TRUE) + theme(legend.position = "none") 
 ```
 
-```{r}
-FeaturePlot(sobj, features.plot = "nUMI", no.legend=FALSE)
+We can compare our clustering result with the annotated cells by tabulating 
+
+```{r, fig.width=8, fig.height=6}
+library(corrplot)
+
+cluster.comparison <- table(sobj@ident, sobj@meta.data$AnnotationSimple)
+corrplot(cluster.comparison, is.corr = FALSE, method = "number", col="blue")
 ```
+
 
 We can also reproduce figure 4D.
 
@@ -386,30 +415,6 @@ We can also reproduce figure 4D.
 genes <- c("Sftpc", "Vwf", "Dcn", "Cxcl14")
 FeaturePlot(sobj, features.plot = genes, cols.use=c("grey", "red"), no.legend = FALSE)
 ```
-
-
-
-
-
-```{r tsne-2, fig.width=8, fig.height=8}
-# sobj.p10 <- RunTSNE(object = sobj, dims.use = 1:20, do.fast = TRUE, perplexity=5)
-# plot.p10 <- TSNEPlot(object = sobj.p10, do.return=TRUE) + ggtitle("Perplexity 5")
-# 
-# sobj.p30 <- RunTSNE(object = sobj, dims.use = 1:20, do.fast = TRUE, perplexity=10)
-# plot.p30 <- TSNEPlot(object = sobj.p30, do.return=TRUE) + ggtitle("Perplexity 10")
-# 
-# sobj.p50 <- RunTSNE(object = sobj, dims.use = 1:20, do.fast = TRUE, perplexity=30)
-# plot.p50 <- TSNEPlot(object = sobj.p50, do.return=TRUE) + ggtitle("Perplexity 30")
-# 
-# sobj.p100 <- RunTSNE(object = sobj, dims.use = 1:20, do.fast = TRUE, perplexity=50)
-# plot.p100 <- TSNEPlot(object = sobj.p100, do.return=TRUE) + ggtitle("Perplexity 50")
-# 
-# grid.arrange(plot.p10, plot.p30, plot.p50, plot.p100)
-```
-
-
-
-
 
 # Session Information
 
