@@ -386,14 +386,17 @@ abline(v=c(5000, 10000), lty="dashed")
 
 **Task**: Modify the above R code using the read counts obtained from the full dataset. You can find the file in the `output_dropseq_full` directory.
 
-<details><summary>Click Here to see the solution</summary><p>
+<details><summary>Click Here to see the solution</summary>
+
 ```R
 read.counts <- read.table("output_dropseq_full/read_counts.txt")
 plot(read.counts[,1], type="l", log="xy", xlab="Barcodes", ylab="# of reads")
 abline(v=c(5000, 10000), lty="dashed")
 ```
 ![](images/dropseq-barcodes-full.png)
-</p></details><br/>
+
+</details>
+<br/>
 
 There appears to be an inflexion point in the number of mapped reads after the first 5,000 to 10,000 barcodes. We can use the latter as a conservative upper-limit on the estimated number of cells in the dataset.
 
