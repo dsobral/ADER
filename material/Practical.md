@@ -8,10 +8,6 @@ A good source of information for this part is [RNA-seqlopedia](http://rnaseq.uor
 
 At the moment, the high throughput sequencing technology most often used (by far) is Illumina. Similarly to the Sanger method, it is also based on the addition of nucleotides specifically modified to block DNA strand elongation, where each nucleotide is marked with a different color. Unlike the Sanger method, where a single DNA molecule is "read" at a time, modern illumina machines allow reading up to millions of DNA molecules simultaneously.  
 
-The following links are a good source of information regarding this sequencing technology:
-* [Illumina Sequencing by Synthesis](https://www.youtube.com/watch?&v=fCd6B5HRaZ8).
-* [Elaine Mardis talk on NGS](https://www.youtube.com/watch?v=v1DbcJD4Ry0).
-
 Commmon steps in most high throughput sequencing workflows:
 <p>
 
@@ -30,11 +26,15 @@ Commmon steps in most high throughput sequencing workflows:
 
 ![NGS Workflow](images/NGSworkflow.jpg)
 
+## Paired-end sequencing
+
 Many sequencing machines can read both ends of a fragment. This is called paired-end sequencing.
 
 ![Adaptor](images/paired-end.jpg)
 <br/>
 <br/>
+
+## Common parameters to consider when sequencing
 
 When sending your samples to a sequencing facility, these are the most frequent parameters to consider:
 <p>
@@ -46,6 +46,12 @@ When sending your samples to a sequencing facility, these are the most frequent 
   * Coverage (number of reads)
 
 </p>
+<br/>
+
+The following links are a good source of information regarding illumina sequencing technology:
+* [Illumina Sequencing by Synthesis](https://www.youtube.com/watch?&v=fCd6B5HRaZ8).
+* [Elaine Mardis talk on NGS](https://www.youtube.com/watch?v=v1DbcJD4Ry0).
+
 <br/>
 
 ## Considerations when obtaining your RNA.
