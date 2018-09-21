@@ -1,8 +1,8 @@
-### <a id="LO1">Learning Outcome 1: Plan your experiment using NGS technologies</a>
+# <a id="LO1">Learning Outcome 1: Plan your experiment using NGS technologies</a>
 
 A good source of information for this part is [RNA-seqlopedia](http://rnaseq.uoregon.edu).
 
-#### The High Throughput Sequencing Workflow
+## The High Throughput Sequencing Workflow
 
 [Sanger sequencing](https://en.wikipedia.org/wiki/Sanger_sequencing) brought about a technological revolution, as it allowed to directly read DNA molecules with relative ease and affordability. The [Human Genome Project](https://en.wikipedia.org/wiki/Human_Genome_Project) motivated further progress, leading to automated DNA-sequencing machines capable of sequencing up to 384 samples in a single batch using capillary electrophoresis. Further advances enabled the development of high throughput sequencing (HTS), also known as next generation sequencing (NGS) platforms.
 
@@ -48,7 +48,7 @@ When sending your samples to a sequencing facility, these are the most frequent 
 </p>
 <br/>
 
-#### Considerations when obtaining your RNA.
+## Considerations when obtaining your RNA.
 
 The first step in a transcriptomic experiment is to obtain the RNA. After isolating total RNA from cells, one can directly sequence it. Nonetheless, the majority of the RNA in a cell is ribosomal RNA, which may need to be removed using specific kits. Moreover, total RNA also contains unprocessed immature transcripts and RNA targeted for degradation (at different stages of processing).
 
@@ -58,7 +58,7 @@ Some protocols can also keep strand information. In this case, the reads have th
 
 Finally, we also need to consider the amount of material available. Are we dealing with samples with a lot of RNA (eg. cell cultures), or short amounts (eg. small tissue samples, single-cell) that are prone to amplification artifacts and presence of contaminant sequences?
 
-#### Designing your experiment for differential expression using RNAseq.
+## Designing your experiment for differential expression using RNAseq.
 
 Longer read length, paired-end sequencing and strand-specific library preparation are particularly relevant to reveal gene structure. For example, on a non-model organism for which there is no genome sequenced, or the genes are poorly annotated. They are also relevant when alterative splicing is a factor to take into consideration. Discovering gene structure is a complex process and it would be the subject of an entire course on its own.
 
@@ -69,7 +69,7 @@ To infer genes differentially expressed between conditions, we need to obtain ac
 At IGC we mainly use two library preparation methods (both unstranded): [Smart-seq](http://www.clontech.com/GQ/Products/cDNA_Synthesis_and_Library_Construction/Next_Gen_Sequencing_Kits/Single_cell_RNA_Seq_Kits_for_mRNA_seq/Single_Cell_RNA_Seq_v4) and [QuantSeq](https://www.lexogen.com/quantseq-3mrna-sequencing/). QuantSeq is adequate for "normal" bulk samples (with many cells), it only sequences the ends of the transcripts, and thus requires less reads per sample (because only a small portion of the transcript is sequence). Since it only sequences a small portion of the transcript, it can only be used for differential gene expression analysis. Smart-Seq, on the other hand, sequences full length cDNAs, and it can be used with bulk samples, as well as with samples with very low numbers of cells, including even single-cell. Specific analysis techniques are necessary for samples with very low cell numbers, which we will briefly cover later in the course.
 
 
-### <a id="LO2">Learning Outcome 2: List steps in the analysis of RNAseq differential expression experiments</a>
+# <a id="LO2">Learning Outcome 2: List steps in the analysis of RNAseq differential expression experiments</a>
 
 Steps in the analysis of RNA-Seq:
 <p>
