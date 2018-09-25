@@ -230,7 +230,7 @@ PCHeatmap(sobj, pc.use = 1:15, cells.use = 500, do.balanced = TRUE, label.column
 
 **Question**: Based on the above plots, how many principal components would you consider for further analysis.
 
-<details><summary>Click Here to see the answer</summary>
+<details><summary><b>Click Here to see the answer</b></summary>
 
 There is a drop in the percentage of variance explained after PC15 and the plot seems to reach saturation after approximately 20 PCs. Thus, 15 to 20 PCs seem to be adequate for this dataset.
 
@@ -274,6 +274,19 @@ For scRNA-seq datasets, a `perplexity` value in the range of  20 to 50 usually p
 sobj <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=50)
 TSNEPlot(sobj, do.label = TRUE)
 ```
+
+**Exercise**: Modify the commands above to try different values of the `perplexity` argument.
+
+<details><summary><b>Click Here to see the solution</b></summary>
+
+```{r}
+for (i in c(5, 10, 20, 50)) {
+  tmp <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=10)
+  TSNEPlot(tmp, do.label = TRUE)
+}
+```
+
+</details>
 
 # Finding marker genes
 
@@ -412,9 +425,23 @@ DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key 
 
 # Annotation of cell clusters
 
-Now that we have a clear set of 15 clusters and marker genes associated with each cluster, we may start annotating these clusters. 
+Now that we have a clear set of 15 clusters and marker genes associated with each cluster, we may start annotating these clusters, by trying to identify what cell types are associated with each cluster. 
 
-Tomorrow, we will see how functional analysis can help in this process.
+**Question**: What methods would you use to identify which cell populations are being identified?
+
+
+
+
+```{r, fig.width=6, fig.height=6}
+FeaturePlot(sobj, features.plot = c("Il7r", "Cd8a", "Ms4a1"), cols.use=c("grey", "red"), pt.size=0.5)
+```
+
+```{r}
+VlnPlot(sobj, features.plot = c("Il7r", "Cd8a", "Ms4a1"), point.size.use=0.5)
+```
+
+
+Tomorrow, we will see how functional analysis can also help in this process.
 
 For now, we will import the annotated cell assignments from the study and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the cell assignments from the paper. 
 

@@ -305,7 +305,7 @@ sobj <- ScaleData(object = sobj, vars.to.regress = c("nUMI", "percent.mito"))
 
 ```
 ## 
-## Time Elapsed:  15.0471527576447 secs
+## Time Elapsed:  15.6823744773865 secs
 ```
 
 ```
@@ -364,7 +364,7 @@ PCHeatmap(sobj, pc.use = 1:15, cells.use = 500, do.balanced = TRUE, label.column
 
 **Question**: Based on the above plots, how many principal components would you consider for further analysis.
 
-<details><summary>Click Here to see the answer</summary>
+<details><summary><b>Click Here to see the answer</b></summary>
 
 There is a drop in the percentage of variance explained after PC15 and the plot seems to reach saturation after approximately 20 PCs. Thus, 15 to 20 PCs seem to be adequate for this dataset.
 
@@ -415,6 +415,22 @@ TSNEPlot(sobj, do.label = TRUE)
 
 ![](tutorial-seurat-mca_files/figure-html/tsne-1.png)<!-- -->
 
+**Exercise**: Modify the commands above to try different values of the `perplexity` argument.
+
+<details><summary><b>Click Here to see the solution</b></summary>
+
+
+```r
+for (i in c(5, 10, 20, 50)) {
+  tmp <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=10)
+  TSNEPlot(tmp, do.label = TRUE)
+}
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-1.png)<!-- -->![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-2.png)<!-- -->![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-3.png)<!-- -->![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-4.png)<!-- -->
+
+</details>
+
 # Finding marker genes
 
 Seurat implements several methods for the discovery of cluster marker genes (differential expression). By default it uses two sample Wilcoxon tests, which for large datasets scRNA-seq with many cells has been shown to perform well. To speed up the computation, we will not test all genes, but only those that are destected in at least 25% of the cells in either population (the tested cluster or the combination of all other clusters) and have at least 0.25 log fold-change difference between the two populations.
@@ -452,7 +468,7 @@ top.markers <- do.call(rbind, lapply(split(markers, markers$cluster), head))
 DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key = TRUE)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
 Or we can investigate the expression of specific genes. Below we plot the expression of the top 6 markers for cluster 0 as violin plots, and by projecting the expression of these genes on a t-SNE plot.
 
@@ -463,13 +479,13 @@ markers.0 <- markers[ which(markers$cluster == 0), ]
 VlnPlot(sobj, features.plot = head(markers.0$gene), point.size.use=0.5)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
 
 ```r
 FeaturePlot(sobj, features.plot = head(markers.0$gene), cols.use = c("grey", "blue"), reduction.use = "tsne")
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-18-2.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-19-2.png)<!-- -->
 
 **Exercise**: Modify the commands above to plot the top markers of cluster 7.
 
@@ -481,13 +497,13 @@ markers.7 <- markers[ which(markers$cluster == 7), ]
 FeaturePlot(sobj, features.plot = head(markers.7$gene), cols.use = c("grey", "blue"), reduction.use = "tsne")
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
 
 ```r
 VlnPlot(sobj, features.plot = head(markers.7$gene), point.size.use=0.5)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-19-2.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-20-2.png)<!-- -->
 
 </details>
 
@@ -617,7 +633,7 @@ markers.7.13 <- FindMarkers(sobj, ident.1 = 7, ident.2 = 13, min.pct=0.25)
 FeaturePlot(sobj, features.plot = c("Dcn", "Cxcl14"), cols.use = c("grey", "blue"), reduction.use = "tsne")
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
 
 It appears that most differences between clusters 0, 2, 3 and 4 are due to small differences in the amount of mitochondrial RNA. Clusters 7 and 13 however display a larger amount of differentially expressed genes, and might represent different cell populations.
 
@@ -641,7 +657,7 @@ And plot the t-SNE again to check the result.
 TSNEPlot(sobj, do.label = TRUE)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
 
 Finally, we run the `FindAllMarkers` function again to account for the new clustering.
 
@@ -662,13 +678,33 @@ top.markers <- do.call(rbind, lapply(split(markers, markers$cluster), head))
 DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key = TRUE)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-27-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-28-1.png)<!-- -->
 
 # Annotation of cell clusters
 
-Now that we have a clear set of 15 clusters and marker genes associated with each cluster, we may start annotating these clusters. 
+Now that we have a clear set of 15 clusters and marker genes associated with each cluster, we may start annotating these clusters, by trying to identify what cell types are associated with each cluster. 
 
-Tomorrow, we will see how functional analysis can help in this process.
+**Question**: What methods would you use to identify which cell populations are being identified?
+
+
+
+
+
+```r
+FeaturePlot(sobj, features.plot = c("Il7r", "Cd8a", "Ms4a1"), cols.use=c("grey", "red"), pt.size=0.5)
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-29-1.png)<!-- -->
+
+
+```r
+VlnPlot(sobj, features.plot = c("Il7r", "Cd8a", "Ms4a1"), point.size.use=0.5)
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
+
+
+Tomorrow, we will see how functional analysis can also help in this process.
 
 For now, we will import the annotated cell assignments from the study and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the cell assignments from the paper. 
 
@@ -695,7 +731,7 @@ TSNEPlot(sobj, group.by="Annotation", do.label=TRUE, do.return=TRUE) + theme(leg
 ## Warning: Removed 1 rows containing missing values (geom_text).
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-29-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-32-1.png)<!-- -->
 
 ```r
 TSNEPlot(sobj, group.by="AnnotationSimple", do.label=TRUE, do.return=TRUE) + theme(legend.position = "none") 
@@ -705,10 +741,9 @@ TSNEPlot(sobj, group.by="AnnotationSimple", do.label=TRUE, do.return=TRUE) + the
 ## Warning: Removed 1 rows containing missing values (geom_text).
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-29-2.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-32-2.png)<!-- -->
 
-We can compare our clustering result with the annotated cells by tabulating cluster cell assignments.
-
+We can compare our clustering result with the annotated cells by tabulating cluster cell assignments. 
 
 
 ```r
@@ -719,7 +754,7 @@ ggplot(mdf, aes(x=factor(Cluster), y=Annotation)) +
   geom_text(aes(label=Cells, alpha=Cells>0))
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-33-1.png)<!-- -->
 
 We can also reproduce figure 4D.
 
@@ -729,7 +764,7 @@ genes <- c("Sftpc", "Vwf", "Dcn", "Cxcl14")
 FeaturePlot(sobj, features.plot = genes, cols.use=c("grey", "red"), no.legend = FALSE)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-31-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-34-1.png)<!-- -->
 
 # Session Information
 
