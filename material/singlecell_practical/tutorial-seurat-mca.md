@@ -1,7 +1,7 @@
 ---
 title: "ADER18S - Analysis of Mouse Cell Atlas scRNA-seq using Seurat"
 author: "Daniel Neves"
-date: '17 Setembro, 2018'
+date: '25 Setembro, 2018'
 output: 
   html_document:
     keep_md: yes
@@ -27,6 +27,8 @@ First we load a few packages. `Seurat` is one of several packages designed for d
 ```r
 library(Seurat)
 library(gridExtra)
+library(ggplot2)
+library(reshape2)
 ```
 
 # Loading and filtering the raw UMI count matrix
@@ -35,7 +37,7 @@ First we load the raw UMI matrix into the R environment.
 
 
 ```r
-mat.raw <- read.table(gzfile("matrices/lung1_full.dge.txt.gz"), header=TRUE)
+mat.raw <- read.table(gzfile("matrices/lung1_full_hisat2.dge.txt.gz"), header=TRUE)
 rownames(mat.raw) <- mat.raw$GENE
 mat.raw <- mat.raw[, -1]
 
@@ -43,12 +45,14 @@ dim(mat.raw)
 ```
 
 ```
-## [1] 16815 10000
+## [1] 16566 10000
 ```
 
 **Question**: How many genes and barcodes are quantified in this raw UMI matrix? 
 
 <details><summary><b>Click Here to see the answer</b></summary> 16815 genes and 10000 barcodes. </details>
+
+---
 
 Next we plot the total number of UMI counts per barcode in the raw UMI matrix. 
 
@@ -82,10 +86,12 @@ abline(h=500, lty="dashed")
 ```
 
 ```
-## [1] 2709
+## [1] 2684
 ```
 
 </details>
+
+---
 
 We remove from the matrix all barcodes below the selected total UMI threshold.
 
@@ -97,7 +103,7 @@ dim(mat.raw)
 ```
 
 ```
-## [1] 16815  2709
+## [1] 16566  2684
 ```
 
 To use the `Seurat` package, we first need to create a *Seurat object*. This is a complex data structure that will conveniently hold all relevant information during the analysis, such as the raw count data, the normalized expressions, reduced dimensions, cluster assignments, etc...
@@ -112,7 +118,7 @@ dim(sobj@data)
 ```
 
 ```
-## [1] 13051  2709
+## [1] 12989  2684
 ```
 
 Next we inspect the distributions of total counts per cell, and number of genes detected per cell. As expected, the higher the number of total counts in a cell, the higher the number of genes that we are able to detect.
@@ -137,6 +143,8 @@ plot(sobj@meta.data$nUMI, sobj@meta.data$nGene, pch=20, cex=0.5)
 This suggest that if the sample was sequenced deeper, we would be able to detect more genes.
 
 </details>
+
+---
 
 Next we calculate the percentage of mitochondrial RNA in each cell and add this information as cell metadata. We then plot the distibutions of total UMI counts, number of detected genes and percent of mitochondrial RNA for all cells.
 
@@ -167,6 +175,8 @@ A high percentage of mitochondrial RNA ususally indicates a dead or burst cell, 
 
 </details>
 
+---
+
 **Question:** Examine the distrubutions above. What cells, if any, would you remove from the analysis?
 
 <details><summary><b>Click Here to see the answer</b></summary> 
@@ -174,6 +184,8 @@ A high percentage of mitochondrial RNA ususally indicates a dead or burst cell, 
 A high percentage of mitochondrial RNA can indicate defective cells, so we should probably remove those. Also, barcodes with a much higher than average number of detected genes may indicate a multiplet (multiple cells in the same droplet), so we also remove barcodes with more than 1500 genes detected. 
 
 </details>
+
+---
 
 
 ```r
@@ -184,7 +196,7 @@ dim(sobj@data)
 ```
 
 ```
-## [1] 13051  2671
+## [1] 12989  2611
 ```
 
 # Normalization
@@ -207,17 +219,28 @@ sobj@data[1:10, 1:10]
 ```
 
 ```
-##                                                                     
-## 0610007P14Rik . .         .         . .       . . . .      .        
-## 0610009B22Rik . .         0.2808266 . .       . . . .      .        
-## 0610009L18Rik . .         .         . .       . . . .      0.2802496
-## 0610009O20Rik . .         0.2808266 . .       . . . .      .        
-## 0610010F05Rik . .         .         . .       . . . .      .        
-## 0610011F06Rik . .         .         . 0.33184 . . . 0.5146 0.2802496
-## 0610012G03Rik . .         .         . .       . . . .      .        
-## 0610030E20Rik . .         .         . .       . . . .      .        
-## 0610037L13Rik . 0.2616697 .         . .       . . . .      0.2802496
-## 0610040B10Rik . .         .         . .       . . . .      .
+##                                                                       
+## 0610007P14Rik . .         .        0.2889806 .         . . .         .
+## 0610009B22Rik . .         0.282853 .         .         . . .         .
+## 0610009L18Rik . .         .        .         .         . . .         .
+## 0610009O20Rik . .         0.282853 .         .         . . 0.2072077 .
+## 0610010F05Rik . .         .        .         .         . . .         .
+## 0610011F06Rik . .         .        .         0.3396339 . . .         .
+## 0610012G03Rik . .         .        .         .         . . .         .
+## 0610030E20Rik . .         .        .         .         . . .         .
+## 0610037L13Rik . 0.2679462 .        .         .         . . 0.2072077 .
+## 0610040B10Rik . .         .        .         .         . . .         .
+##                        
+## 0610007P14Rik .        
+## 0610009B22Rik .        
+## 0610009L18Rik .        
+## 0610009O20Rik .        
+## 0610010F05Rik .        
+## 0610011F06Rik 0.5245681
+## 0610012G03Rik .        
+## 0610030E20Rik .        
+## 0610037L13Rik .        
+## 0610040B10Rik .
 ```
 
 # Finding highly variable genes
@@ -245,7 +268,7 @@ length(sobj@var.genes)
 ```
 
 ```
-## [1] 935
+## [1] 944
 ```
 
 We can check the expression of a few of these variable genes across all cells using the `VlnPlot` function. We plot the expression of the 6 variable genes with highest dispersion, and the 6 variable genes with highest mean.
@@ -282,7 +305,7 @@ sobj <- ScaleData(object = sobj, vars.to.regress = c("nUMI", "percent.mito"))
 
 ```
 ## 
-## Time Elapsed:  15.6205270290375 secs
+## Time Elapsed:  15.0471527576447 secs
 ```
 
 ```
@@ -342,17 +365,12 @@ PCHeatmap(sobj, pc.use = 1:15, cells.use = 500, do.balanced = TRUE, label.column
 **Question**: Based on the above plots, how many principal components would you consider for further analysis.
 
 <details><summary>Click Here to see the answer</summary>
+
 There is a drop in the percentage of variance explained after PC15 and the plot seems to reach saturation after approximately 20 PCs. Thus, 15 to 20 PCs seem to be adequate for this dataset.
+
 </details>
 
-
-```r
-# sobj <- JackStraw(sobj, num.pc = 40, num.replicate = 50, do.par=TRUE, display.progress = FALSE)
-# sobj <- JackStrawPlot(sobj, PCs = 1:40)
-# 
-# plot(1:40, -log10(sobj@dr$pca@jackstraw@overall.p.values[,2]))
-# abline(h=-log10(0.05))
-```
+---
 
 # Clustering
 
@@ -391,7 +409,7 @@ For scRNA-seq datasets, a `perplexity` value in the range of  20 to 50 usually p
 
 
 ```r
-sobj <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE)
+sobj <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=50)
 TSNEPlot(sobj, do.label = TRUE)
 ```
 
@@ -409,7 +427,7 @@ markers <- markers[ markers$p_val_adj < 0.01, ]
 write.table(markers, file="lung1_markers.txt")
 ```
 
-The above command will return a table containing all identied markers (differentially expressed genes) for each cluster. For example, the *Sftpc* gene is identified as a marker gene for cluster 0. It is expressed in 100% of the cells of all clusters, but is 2-fold up-regulated in cells belonging to cluster 0.
+The above command will return a table containing all identied markers (differentially expressed genes) for each cluster. For example, the *Sftpa1* gene is identified as a marker gene for cluster 0. It is expressed in 99.8% of the cells in cluster 0, and 82.9% of cells in other clusters. It is 2-fold up-regulated in cells belonging to cluster 0.
 
 
 ```r
@@ -418,51 +436,15 @@ head(markers)
 
 ```
 ##                p_val avg_logFC pct.1 pct.2     p_val_adj cluster   gene
-## Sftpc  1.055082e-157 0.9742411 1.000 1.000 1.376988e-153       0  Sftpc
-## Sftpa1 1.984045e-152 1.1020114 0.996 0.846 2.589377e-148       0 Sftpa1
-## Sftpd  3.654520e-132 0.8664690 0.984 0.579 4.769514e-128       0  Sftpd
-## Cbr2   9.300043e-128 0.9219564 0.994 0.746 1.213749e-123       0   Cbr2
-## Sftpb  9.081302e-127 0.9474188 0.992 0.731 1.185201e-122       0  Sftpb
-## Wfdc2  2.958337e-119 0.7048043 0.972 0.503 3.860925e-115       0  Wfdc2
+## Sftpa1 1.095717e-138 1.0530666 0.998 0.829 1.423227e-134       0 Sftpa1
+## Sftpc  3.086849e-125 0.9050150 1.000 1.000 4.009509e-121       0  Sftpc
+## Sftpd  1.547299e-122 0.8036257 0.988 0.567 2.009787e-118       0  Sftpd
+## Cbr2   3.286653e-119 0.8810355 0.992 0.705 4.269034e-115       0   Cbr2
+## Wfdc2  8.441435e-115 0.6698591 0.972 0.492 1.096458e-110       0  Wfdc2
+## Cxcl15 9.494010e-115 0.7758587 0.955 0.419 1.233177e-110       0 Cxcl15
 ```
 
-Seurat provides several functions to visualize the expression of these genes. 
-
-
-```r
-markers.0 <- markers[ which(markers$cluster == 0), ]
-FeaturePlot(sobj, features.plot = head(rownames(markers.0)), cols.use = c("grey", "blue"), reduction.use = "tsne")
-```
-
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
-
-```r
-VlnPlot(sobj, features.plot = head(rownames(markers.0)), point.size.use=0.5)
-```
-
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-18-2.png)<!-- -->
-
-**Exercise**: Modify the commands above to plot the top markers of cluster 8.
-
-<details><summary>Click Here to see the solution</summary>
-
-
-```r
-markers.8 <- markers[ which(markers$cluster == 8), ]
-FeaturePlot(sobj, features.plot = head(rownames(markers.8)), cols.use = c("grey", "blue"), reduction.use = "tsne")
-```
-
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
-
-```r
-VlnPlot(sobj, features.plot = head(rownames(markers.8)), point.size.use=0.5)
-```
-
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-19-2.png)<!-- -->
-
-</details>
-
-We can also visualize the top markers for all clusters as a single heatmap. 
+Seurat provides several functions to visualize the expression of these genes. We visualize the top markers for all clusters as a single heatmap. 
 
 
 ```r
@@ -470,7 +452,56 @@ top.markers <- do.call(rbind, lapply(split(markers, markers$cluster), head))
 DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key = TRUE)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+
+Or we can investigate the expression of specific genes. Below we plot the expression of the top 6 markers for cluster 0 as violin plots, and by projecting the expression of these genes on a t-SNE plot.
+
+
+```r
+markers.0 <- markers[ which(markers$cluster == 0), ]
+
+VlnPlot(sobj, features.plot = head(markers.0$gene), point.size.use=0.5)
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
+
+```r
+FeaturePlot(sobj, features.plot = head(markers.0$gene), cols.use = c("grey", "blue"), reduction.use = "tsne")
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-18-2.png)<!-- -->
+
+**Exercise**: Modify the commands above to plot the top markers of cluster 7.
+
+<details><summary>Click Here to see the solution</summary>
+
+
+```r
+markers.7 <- markers[ which(markers$cluster == 7), ]
+FeaturePlot(sobj, features.plot = head(markers.7$gene), cols.use = c("grey", "blue"), reduction.use = "tsne")
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
+
+```r
+VlnPlot(sobj, features.plot = head(markers.7$gene), point.size.use=0.5)
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-19-2.png)<!-- -->
+
+</details>
+
+---
+
+**Question**: What can you conclude from the above plots?
+
+<details><summary>Click Here to see the solution</summary>
+
+Some of the clusters appear to be very similar to each other. In particular, clusters 0, 2, 3 and 4 appear to be similar. This is the result of *over-clustering* the cells, which splits large clusters of similar cells into smaller clusters based on small, negligeable, differences between the cells.
+
+</details>
+
+---
 
 **Question**: Based on the t-SNE visualization, and expression of marker genes represented in the above plots, do you think any of the clusters should be combined? If yes, which ones?
 
@@ -482,115 +513,103 @@ We can check for differences between two specific clusters. Below we check if th
 
 
 ```r
-markers.0.1 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 1, min.pct=0.25)
-markers.0.1 <- markers.0.1[ markers.0.1$p_val_adj < 0.01, ]
+markers.0.2 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 2, min.pct=0.25)
+markers.0.2 <- markers.0.2[ markers.0.2$p_val_adj < 0.01, ]
 
-markers.0.1
+markers.0.2
 ```
 
 ```
-##                p_val  avg_logFC pct.1 pct.2    p_val_adj
-## mt-Nd4  9.961751e-51 -0.3923274 0.990 1.000 1.300108e-46
-## mt-Nd1  6.986866e-48 -0.3749705 0.986 1.000 9.118558e-44
-## mt-Nd2  1.739375e-40 -0.3688947 0.978 1.000 2.270059e-36
-## mt-Cytb 4.614817e-39 -0.3081076 0.994 1.000 6.022798e-35
-## mt-Nd5  2.271263e-18 -0.3191316 0.811 0.893 2.964226e-14
+##               p_val avg_logFC pct.1 pct.2    p_val_adj
+## mt-Nd1 9.081556e-21 0.2704321 1.000 0.967 1.179603e-16
+## mt-Co1 4.170115e-20 0.2872544 1.000 0.947 5.416563e-16
+## mt-Nd2 2.043570e-15 0.2612302 0.998 0.959 2.654393e-11
+## mt-Co3 1.176689e-13 0.2798762 0.961 0.816 1.528401e-09
 ```
 
-**Exercise**: Modify the commands above to check for diferences between clusters 0 and 2, 0 and 13 and 8 and 9.
+**Exercise**: Modify the commands above to check for diferences between clusters 0 and 3, 0 and 4. Also compare clusters and 7 and 13.
 
 <details><summary>Click Here to see the solution</summary>
 
 
 ```r
-markers.0.2 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 2, min.pct=0.25)
-(markers.0.2 <- markers.0.2[ markers.0.2$p_val_adj < 0.01, ])
-```
-
-```
-##              p_val avg_logFC pct.1 pct.2    p_val_adj
-## Sftpc 1.602005e-63 0.3518711     1     1 2.090776e-59
-```
-
-```r
-markers.0.13 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 13, min.pct=0.25)
-(markers.0.13 <- markers.0.13[ markers.0.13$p_val_adj < 0.01, ])
+markers.0.3 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 3, min.pct=0.25)
+(markers.0.3 <- markers.0.3[ markers.0.3$p_val_adj < 0.01, ])
 ```
 
 ```
 ##                p_val  avg_logFC pct.1 pct.2    p_val_adj
-## mt-Nd2  3.315311e-29 -0.8216176 0.978 1.000 4.326812e-25
-## mt-Nd1  3.375789e-29 -0.7533235 0.986 1.000 4.405742e-25
-## mt-Nd4  6.078753e-29 -0.7455023 0.990 1.000 7.933380e-25
-## mt-Cytb 1.574442e-25 -0.6320817 0.994 1.000 2.054804e-21
-## mt-Co1  1.183547e-14 -0.4943552 0.896 0.942 1.544647e-10
-## Sftpa1  1.414640e-13  0.3821763 0.996 0.971 1.846246e-09
-## mt-Nd5  2.567116e-12 -0.5864085 0.811 0.928 3.350343e-08
-## Gm42418 1.057011e-07 -0.4347929 0.197 0.435 1.379505e-03
+## mt-Cytb 6.632984e-36 -0.3158082 1.000 1.000 8.615582e-32
+## mt-Nd4  1.928974e-35 -0.3638306 1.000 1.000 2.505545e-31
+## mt-Nd1  3.264792e-32 -0.3426989 1.000 1.000 4.240638e-28
+## mt-Nd2  7.237269e-31 -0.3472164 0.998 1.000 9.400488e-27
+## mt-Co1  1.671524e-30 -0.3088900 1.000 1.000 2.171143e-26
+## mt-Co3  1.879271e-20 -0.3278731 0.961 0.975 2.440984e-16
+## mt-Atp6 3.433435e-11 -0.2579180 0.856 0.916 4.459689e-07
+## Cd74    5.259809e-10  0.2694198 0.951 0.840 6.831966e-06
+## Scgb1a1 8.834379e-08 -0.5624304 0.996 0.992 1.147498e-03
 ```
 
 ```r
-markers.8.9 <- FindMarkers(sobj, ident.1 = 8, ident.2 = 9, min.pct=0.25)
-(markers.8.9 <- markers.8.9[ markers.8.9$p_val_adj < 0.01, ])
+markers.0.4 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 4, min.pct=0.25)
+(markers.0.4 <- markers.0.4[ markers.0.4$p_val_adj < 0.01, ])
+```
+
+```
+##              p_val  avg_logFC pct.1 pct.2    p_val_adj
+## Sftpc 1.636111e-43  0.3000510 1.000 1.000 2.125144e-39
+## B2m   6.376285e-10 -0.2519968 0.617 0.868 8.282157e-06
+```
+
+```r
+markers.7.13 <- FindMarkers(sobj, ident.1 = 7, ident.2 = 13, min.pct=0.25)
+(markers.7.13 <- markers.7.13[ markers.7.13$p_val_adj < 0.01, ])
 ```
 
 ```
 ##                 p_val  avg_logFC pct.1 pct.2    p_val_adj
-## Dcn      1.332119e-30  1.5535752 0.991 0.474 1.738549e-26
-## Serpinf1 1.117230e-26  1.0334890 0.791 0.123 1.458097e-22
-## Clec3b   1.377908e-21  0.8205276 0.861 0.342 1.798308e-17
-## Pi16     2.232171e-21  0.8471463 0.696 0.079 2.913206e-17
-## Igfbp4   2.386887e-21  0.9931329 0.878 0.298 3.115126e-17
-## Ly6a     2.563792e-20  0.9147230 0.739 0.167 3.346005e-16
-## Cxcl14   1.140379e-18 -0.9942767 0.052 0.596 1.488308e-14
-## Npnt     1.608033e-17 -0.6885091 0.043 0.553 2.098644e-13
-## Col1a1   1.669303e-17  0.9657462 0.939 0.667 2.178607e-13
-## Col3a1   1.606787e-16  1.0313486 0.983 0.754 2.097017e-12
-## Col1a2   1.274876e-15  0.8754827 1.000 0.860 1.663840e-11
-## Htra3    1.495799e-14  0.5296903 0.591 0.123 1.952167e-10
-## Hspb1    3.216878e-14 -0.8153372 0.165 0.649 4.198348e-10
-## Gsn      5.207615e-13  0.5928834 0.991 0.939 6.796458e-09
-## Scara5   1.928997e-12  0.3085261 0.383 0.009 2.517535e-08
-## Cygb     2.418410e-12  0.5693137 0.774 0.360 3.156267e-08
-## Ctsl     2.441052e-12  0.5038861 0.930 0.640 3.185817e-08
-## Col14a1  2.525322e-12  0.4170803 0.609 0.149 3.295797e-08
-## Cd34     3.350560e-12  0.4839263 0.635 0.202 4.372816e-08
-## Sparc    5.917541e-12  0.7102619 0.991 0.939 7.722983e-08
-## Fbln1    7.389221e-12  0.4841551 0.748 0.333 9.643672e-08
-## Dpt      9.780515e-12  0.5513043 0.800 0.395 1.276455e-07
-## Limch1   2.000545e-11 -0.4371193 0.070 0.447 2.610911e-07
-## Sept4    3.498856e-11 -0.5065655 0.078 0.456 4.566356e-07
-## Meg3     4.330624e-11  0.5116606 0.513 0.114 5.651897e-07
-## Rgs2     6.226054e-11 -0.7905175 0.052 0.404 8.125622e-07
-## Pcolce   9.170627e-11  0.4962229 0.791 0.482 1.196859e-06
-## Cxcl12   2.027299e-10  0.5512718 0.574 0.193 2.645828e-06
-## Serpinh1 3.296941e-10  0.4849631 0.878 0.561 4.302837e-06
-## Hsd11b1  3.341205e-10 -0.5959751 0.122 0.491 4.360607e-06
-## Cd248    2.755667e-09  0.2927748 0.339 0.035 3.596421e-05
-## Itga8    3.033353e-09 -0.2989370 0.009 0.289 3.958829e-05
-## Entpd2   3.360442e-09  0.2720370 0.330 0.026 4.385713e-05
-## Serping1 3.537203e-09  0.4842611 0.939 0.728 4.616404e-05
-## Aldh1a1  4.483571e-09 -0.4164178 0.087 0.404 5.851508e-05
-## Gpx3     6.618207e-09 -0.8417447 0.478 0.711 8.637421e-05
-## Aebp1    1.269796e-08  0.4270354 0.600 0.254 1.657211e-04
-## Ccl11    1.449863e-08  0.2908968 0.270 0.009 1.892216e-04
-## Ppp1r14a 2.239702e-08 -0.3673775 0.052 0.333 2.923035e-04
-## Ly6c1    2.432292e-08  0.4603056 0.330 0.044 3.174384e-04
-## Gyg      2.674024e-08 -0.2993991 0.043 0.325 3.489869e-04
-## Tmem176a 2.899758e-08 -0.4449104 0.278 0.596 3.784474e-04
-## Tmem176b 3.374194e-08 -0.4334090 0.383 0.684 4.403661e-04
-## Sftpc    3.863057e-08 -0.5363391 1.000 1.000 5.041675e-04
-## Sparcl1  3.865563e-08 -0.5543617 0.609 0.789 5.044946e-04
-## Pdia3    4.073035e-08  0.3280157 0.617 0.246 5.315719e-04
-## Thbs1    5.588092e-08 -0.6330568 0.096 0.395 7.293019e-04
-## Olfml2b  7.174506e-08  0.2550455 0.374 0.070 9.363448e-04
-## Csrp1    8.060399e-08 -0.4301988 0.304 0.570 1.051963e-03
-## Htra1    8.414494e-08  0.2835665 0.496 0.158 1.098176e-03
-## Tns1     2.637751e-07 -0.3725115 0.148 0.421 3.442529e-03
-## Lum      2.738703e-07  0.3224421 0.383 0.088 3.574282e-03
-## Mettl7a1 3.495808e-07 -0.4365506 0.157 0.447 4.562379e-03
-## Mylk     4.864975e-07 -0.3892156 0.087 0.351 6.349278e-03
-## Ces1d    7.087287e-07 -0.3132069 0.035 0.263 9.249618e-03
+## Cxcl14   4.540690e-32 -1.2568898 0.077 0.855 5.897903e-28
+## Npnt     2.126054e-29 -0.8840370 0.065 0.783 2.761531e-25
+## Inmt     2.111993e-22 -1.2899721 0.658 1.000 2.743268e-18
+## Sept4    7.769132e-22 -0.7444115 0.090 0.681 1.009133e-17
+## Hsd11b1  2.940019e-21 -0.8272153 0.103 0.710 3.818791e-17
+## Gpx3     7.088167e-21 -1.1644638 0.426 0.928 9.206820e-17
+## Aldh1a1  2.929254e-17 -0.5929252 0.090 0.594 3.804808e-13
+## Dcn      5.814758e-17  1.4832734 0.871 0.449 7.552789e-13
+## Limch1   1.776348e-14 -0.5044155 0.110 0.580 2.307298e-10
+## Tmem176a 2.296002e-14 -0.5943778 0.290 0.768 2.982277e-10
+## Prelp    5.379633e-14 -0.5736881 0.123 0.580 6.987605e-10
+## Serpinf1 1.185532e-13  0.8607237 0.626 0.101 1.539887e-09
+## Sparcl1  1.537980e-13 -0.6723326 0.594 0.942 1.997682e-09
+## Cd82     2.503952e-11 -0.3556273 0.090 0.478 3.252383e-07
+## Itga8    3.201912e-11 -0.3545410 0.039 0.377 4.158963e-07
+## Gyg      3.848251e-11 -0.3717561 0.071 0.435 4.998494e-07
+## Sod3     6.848880e-11 -0.6416105 0.665 0.913 8.896010e-07
+## Pi16     7.159482e-11  0.6770530 0.535 0.058 9.299451e-07
+## Tmem176b 2.004506e-10 -0.5590178 0.432 0.783 2.603653e-06
+## Tbx2     2.244711e-10 -0.2724670 0.039 0.348 2.915656e-06
+## Mettl7a1 2.446450e-10 -0.5676936 0.168 0.565 3.177694e-06
+## Fmo2     2.668746e-10 -0.5131872 0.323 0.739 3.466434e-06
+## Fhl1     3.064473e-10 -0.6003254 0.374 0.768 3.980444e-06
+## Ly6a     3.210643e-10  0.7525761 0.581 0.145 4.170305e-06
+## Cdo1     4.343483e-10 -0.2975942 0.026 0.319 5.641750e-06
+## Gsta3    9.118938e-10 -0.3252205 0.058 0.377 1.184459e-05
+## Pcolce2  1.162262e-09 -0.6484164 0.574 0.899 1.509662e-05
+## Igfbp4   2.281527e-09  0.7862433 0.710 0.333 2.963475e-05
+## Cst3     4.413878e-09 -0.4902923 0.890 0.986 5.733186e-05
+## Meg3     6.013460e-09  0.5033988 0.432 0.043 7.810883e-05
+## Ppp1r14a 1.522645e-08 -0.3603943 0.090 0.406 1.977763e-04
+## Lrat     1.796118e-08 -0.3654607 0.052 0.319 2.332977e-04
+## Lum      2.962338e-08  0.4465806 0.348 0.000 3.847781e-04
+## Adh1     4.725080e-08 -0.4871839 0.510 0.797 6.137407e-04
+## Spon1    4.935832e-08 -0.3647244 0.090 0.377 6.411152e-04
+## Selenbp1 5.154584e-08 -0.4857643 0.284 0.594 6.695289e-04
+## Hspb1    9.159135e-08 -0.4031854 0.284 0.667 1.189680e-03
+## Gng11    9.591481e-08 -0.4181599 0.161 0.464 1.245837e-03
+## Mgp      1.413562e-07 -0.4379380 0.961 1.000 1.836076e-03
+## Crip1    2.149378e-07  0.6956842 0.761 0.435 2.791827e-03
+## Ces1d    4.380722e-07 -0.3782775 0.065 0.304 5.690120e-03
+## Tgfbi    5.934443e-07  0.3718265 0.342 0.029 7.708247e-03
 ```
 
 
@@ -598,18 +617,20 @@ markers.8.9 <- FindMarkers(sobj, ident.1 = 8, ident.2 = 9, min.pct=0.25)
 FeaturePlot(sobj, features.plot = c("Dcn", "Cxcl14"), cols.use = c("grey", "blue"), reduction.use = "tsne")
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
 
-It appears that most differences between clusters 0, 1, 2 and 13 are due to mitochondrial RNA. Clusters 8 and 9 however display a larger amount of differentially expressed genes, and might represent different cell populations.
+It appears that most differences between clusters 0, 2, 3 and 4 are due to small differences in the amount of mitochondrial RNA. Clusters 7 and 13 however display a larger amount of differentially expressed genes, and might represent different cell populations.
 
 </details>
 
-We will merge clusters 0, 1, 2 and 13 into a single cluster.
+We will merge clusters 0, 2, 3 and 4 into a single cluster (that we name 16). But first, we save the old cluster ids so we can restore them later if need arises.
 
 
 ```r
+sobj <- StashIdent(sobj, save.name = "OriginalClusterNames")
+
 current.cluster.ids <- c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
-new.cluster.ids <- c(0,0,0,3,4,5,6,7,8,9,10,11,12,0,14,15)
+new.cluster.ids <- c(16,1,16,16,16,5,6,7,8,9,10,11,12,13,14,15)
 sobj@ident <- plyr::mapvalues(sobj@ident, from = current.cluster.ids, to = new.cluster.ids)
 ```
 
@@ -620,7 +641,7 @@ And plot the t-SNE again to check the result.
 TSNEPlot(sobj, do.label = TRUE)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
 
 Finally, we run the `FindAllMarkers` function again to account for the new clustering.
 
@@ -629,8 +650,11 @@ Finally, we run the `FindAllMarkers` function again to account for the new clust
 markers <- FindAllMarkers(object = sobj, only.pos = TRUE, min.pct = 0.25, thresh.use = 0.25)
 markers <- markers[ markers$p_val_adj < 0.01, ]
 
-write.table(markers, file="lung1_markers_fixed.txt")
+write.table(markers, file="lung1_markers_fixed.txt", quote = FALSE)
 ```
+
+
+
 
 
 ```r
@@ -640,9 +664,13 @@ DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key 
 
 ![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-27-1.png)<!-- -->
 
-# Comparison with published results
+# Annotation of cell clusters
 
-We will now compare our results to those from the pusblished study. To do so, we will import the annotated cell assignments from the study and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the annotated cell assignments.
+Now that we have a clear set of 15 clusters and marker genes associated with each cluster, we may start annotating these clusters. 
+
+Tomorrow, we will see how functional analysis can help in this process.
+
+For now, we will import the annotated cell assignments from the study and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the cell assignments from the paper. 
 
 
 ```r
@@ -655,6 +683,8 @@ sobj@meta.data$Annotation <- gsub("\\(Lung\\)", "", sobj@meta.data$Annotation)
 
 sobj@meta.data$AnnotationSimple <- gsub("_.*", "", sobj@meta.data$Annotation)
 ```
+
+
 
 
 ```r
@@ -677,24 +707,19 @@ TSNEPlot(sobj, group.by="AnnotationSimple", do.label=TRUE, do.return=TRUE) + the
 
 ![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-29-2.png)<!-- -->
 
-We can compare our clustering result with the annotated cells by tabulating 
+We can compare our clustering result with the annotated cells by tabulating cluster cell assignments.
 
 
-```r
-library(corrplot)
-```
-
-```
-## corrplot 0.84 loaded
-```
 
 ```r
 cluster.comparison <- table(sobj@ident, sobj@meta.data$AnnotationSimple)
-corrplot(cluster.comparison, is.corr = FALSE, method = "number", col="blue")
+mdf <- melt(cluster.comparison, varnames = c("Cluster", "Annotation"), value.name = "Cells")
+
+ggplot(mdf, aes(x=factor(Cluster), y=Annotation)) + 
+  geom_text(aes(label=Cells, alpha=Cells>0))
 ```
 
 ![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
-
 
 We can also reproduce figure 4D.
 
@@ -734,7 +759,7 @@ sessionInfo()
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] corrplot_0.84  bindrcpp_0.2.2 gridExtra_2.3  Seurat_2.3.3  
+## [1] bindrcpp_0.2.2 reshape2_1.4.3 gridExtra_2.3  Seurat_2.3.3  
 ## [5] Matrix_1.2-14  cowplot_0.9.2  ggplot2_2.2.1 
 ## 
 ## loaded via a namespace (and not attached):
@@ -767,15 +792,14 @@ sessionInfo()
 ##  [79] gdata_2.18.0         crayon_1.3.4         doSNOW_1.0.16       
 ##  [82] lattice_0.20-35      splines_3.4.4        SDMTools_1.1-221    
 ##  [85] knitr_1.20           pillar_1.3.0         igraph_1.2.1        
-##  [88] fpc_2.1-10           reshape2_1.4.3       codetools_0.2-15    
-##  [91] stats4_3.4.4         glue_1.3.0           evaluate_0.10.1     
-##  [94] metap_0.9            latticeExtra_0.6-28  data.table_1.11.4   
-##  [97] png_0.1-7            foreach_1.4.4        tidyr_0.8.1         
-## [100] gtable_0.2.0         RANN_2.5.1           purrr_0.2.5         
-## [103] kernlab_0.9-25       assertthat_0.2.0     class_7.3-14        
-## [106] survival_2.42-3      tibble_1.4.2         snow_0.4-2          
-## [109] iterators_1.0.9      cluster_2.0.6        fitdistrplus_1.0-9  
-## [112] ROCR_1.0-7
+##  [88] fpc_2.1-10           codetools_0.2-15     stats4_3.4.4        
+##  [91] glue_1.3.0           evaluate_0.10.1      metap_0.9           
+##  [94] latticeExtra_0.6-28  data.table_1.11.4    png_0.1-7           
+##  [97] foreach_1.4.4        tidyr_0.8.1          gtable_0.2.0        
+## [100] RANN_2.5.1           purrr_0.2.5          kernlab_0.9-25      
+## [103] assertthat_0.2.0     class_7.3-14         survival_2.42-3     
+## [106] tibble_1.4.2         snow_0.4-2           iterators_1.0.9     
+## [109] cluster_2.0.6        fitdistrplus_1.0-9   ROCR_1.0-7
 ```
 
 # References

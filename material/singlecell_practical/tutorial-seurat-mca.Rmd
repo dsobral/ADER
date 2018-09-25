@@ -29,6 +29,8 @@ First we load a few packages. `Seurat` is one of several packages designed for d
 ```{r, message=FALSE}
 library(Seurat)
 library(gridExtra)
+library(ggplot2)
+library(reshape2)
 ```
 
 # Loading and filtering the raw UMI count matrix
@@ -36,7 +38,7 @@ library(gridExtra)
 First we load the raw UMI matrix into the R environment. 
 
 ```{r}
-mat.raw <- read.table(gzfile("matrices/lung1_full.dge.txt.gz"), header=TRUE)
+mat.raw <- read.table(gzfile("matrices/lung1_full_hisat2.dge.txt.gz"), header=TRUE)
 rownames(mat.raw) <- mat.raw$GENE
 mat.raw <- mat.raw[, -1]
 
@@ -46,6 +48,8 @@ dim(mat.raw)
 **Question**: How many genes and barcodes are quantified in this raw UMI matrix? 
 
 <details><summary><b>Click Here to see the answer</b></summary> 16815 genes and 10000 barcodes. </details>
+
+---
 
 Next we plot the total number of UMI counts per barcode in the raw UMI matrix. 
 
@@ -71,6 +75,8 @@ abline(h=500, lty="dashed")
 ```
 
 </details>
+
+---
 
 We remove from the matrix all barcodes below the selected total UMI threshold.
 
@@ -105,6 +111,8 @@ This suggest that if the sample was sequenced deeper, we would be able to detect
 
 </details>
 
+---
+
 Next we calculate the percentage of mitochondrial RNA in each cell and add this information as cell metadata. We then plot the distibutions of total UMI counts, number of detected genes and percent of mitochondrial RNA for all cells.
 
 ```{r}
@@ -126,6 +134,8 @@ A high percentage of mitochondrial RNA ususally indicates a dead or burst cell, 
 
 </details>
 
+---
+
 **Question:** Examine the distrubutions above. What cells, if any, would you remove from the analysis?
 
 <details><summary><b>Click Here to see the answer</b></summary> 
@@ -133,6 +143,8 @@ A high percentage of mitochondrial RNA ususally indicates a dead or burst cell, 
 A high percentage of mitochondrial RNA can indicate defective cells, so we should probably remove those. Also, barcodes with a much higher than average number of detected genes may indicate a multiplet (multiple cells in the same droplet), so we also remove barcodes with more than 1500 genes detected. 
 
 </details>
+
+---
 
 ```{r}
 sobj <- FilterCells(sobj, subset.names = "nGene", high.thresholds = 1500)
@@ -219,16 +231,12 @@ PCHeatmap(sobj, pc.use = 1:15, cells.use = 500, do.balanced = TRUE, label.column
 **Question**: Based on the above plots, how many principal components would you consider for further analysis.
 
 <details><summary>Click Here to see the answer</summary>
+
 There is a drop in the percentage of variance explained after PC15 and the plot seems to reach saturation after approximately 20 PCs. Thus, 15 to 20 PCs seem to be adequate for this dataset.
+
 </details>
 
-```{r}
-# sobj <- JackStraw(sobj, num.pc = 40, num.replicate = 50, do.par=TRUE, display.progress = FALSE)
-# sobj <- JackStrawPlot(sobj, PCs = 1:40)
-# 
-# plot(1:40, -log10(sobj@dr$pca@jackstraw@overall.p.values[,2]))
-# abline(h=-log10(0.05))
-```
+---
 
 # Clustering
 
@@ -263,7 +271,7 @@ Read more about t-SNE:
 For scRNA-seq datasets, a `perplexity` value in the range of  20 to 50 usually produces good results.
 
 ```{r tsne}
-sobj <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE)
+sobj <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=50)
 TSNEPlot(sobj, do.label = TRUE)
 ```
 
@@ -278,40 +286,52 @@ markers <- markers[ markers$p_val_adj < 0.01, ]
 write.table(markers, file="lung1_markers.txt")
 ```
 
-The above command will return a table containing all identied markers (differentially expressed genes) for each cluster. For example, the *Sftpc* gene is identified as a marker gene for cluster 0. It is expressed in 100% of the cells of all clusters, but is 2-fold up-regulated in cells belonging to cluster 0.
+The above command will return a table containing all identied markers (differentially expressed genes) for each cluster. For example, the *Sftpa1* gene is identified as a marker gene for cluster 0. It is expressed in 99.8% of the cells in cluster 0, and 82.9% of cells in other clusters. It is 2-fold up-regulated in cells belonging to cluster 0.
 
 ```{r}
 head(markers)
 ```
 
-Seurat provides several functions to visualize the expression of these genes. 
-
-```{r, fig.width=10, fig.height=8}
-markers.0 <- markers[ which(markers$cluster == 0), ]
-FeaturePlot(sobj, features.plot = head(rownames(markers.0)), cols.use = c("grey", "blue"), reduction.use = "tsne")
-
-VlnPlot(sobj, features.plot = head(rownames(markers.0)), point.size.use=0.5)
-```
-
-**Exercise**: Modify the commands above to plot the top markers of cluster 8.
-
-<details><summary>Click Here to see the solution</summary>
-
-```{r, fig.width=8, fig.height=6}
-markers.8 <- markers[ which(markers$cluster == 8), ]
-FeaturePlot(sobj, features.plot = head(rownames(markers.8)), cols.use = c("grey", "blue"), reduction.use = "tsne")
-
-VlnPlot(sobj, features.plot = head(rownames(markers.8)), point.size.use=0.5)
-```
-
-</details>
-
-We can also visualize the top markers for all clusters as a single heatmap. 
+Seurat provides several functions to visualize the expression of these genes. We visualize the top markers for all clusters as a single heatmap. 
 
 ```{r, fig.width=8, fig.height=12}
 top.markers <- do.call(rbind, lapply(split(markers, markers$cluster), head))
 DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key = TRUE)
 ```
+
+Or we can investigate the expression of specific genes. Below we plot the expression of the top 6 markers for cluster 0 as violin plots, and by projecting the expression of these genes on a t-SNE plot.
+
+```{r, fig.width=10, fig.height=8}
+markers.0 <- markers[ which(markers$cluster == 0), ]
+
+VlnPlot(sobj, features.plot = head(markers.0$gene), point.size.use=0.5)
+FeaturePlot(sobj, features.plot = head(markers.0$gene), cols.use = c("grey", "blue"), reduction.use = "tsne")
+```
+
+**Exercise**: Modify the commands above to plot the top markers of cluster 7.
+
+<details><summary>Click Here to see the solution</summary>
+
+```{r, fig.width=8, fig.height=6}
+markers.7 <- markers[ which(markers$cluster == 7), ]
+FeaturePlot(sobj, features.plot = head(markers.7$gene), cols.use = c("grey", "blue"), reduction.use = "tsne")
+
+VlnPlot(sobj, features.plot = head(markers.7$gene), point.size.use=0.5)
+```
+
+</details>
+
+---
+
+**Question**: What can you conclude from the above plots?
+
+<details><summary>Click Here to see the solution</summary>
+
+Some of the clusters appear to be very similar to each other. In particular, clusters 0, 2, 3 and 4 appear to be similar. This is the result of *over-clustering* the cells, which splits large clusters of similar cells into smaller clusters based on small, negligeable, differences between the cells.
+
+</details>
+
+---
 
 **Question**: Based on the t-SNE visualization, and expression of marker genes represented in the above plots, do you think any of the clusters should be combined? If yes, which ones?
 
@@ -322,40 +342,42 @@ It is clear from the expression heatmap that clusters 0, 1, 2 and possibly 13 re
 We can check for differences between two specific clusters. Below we check if there any genes that distiguish clusters 0 and 1. It appears that these clusters are distiguished only by a small difference in the expression of 5 mitochondrion encoded genes. 
 
 ```{r}
-markers.0.1 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 1, min.pct=0.25)
-markers.0.1 <- markers.0.1[ markers.0.1$p_val_adj < 0.01, ]
+markers.0.2 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 2, min.pct=0.25)
+markers.0.2 <- markers.0.2[ markers.0.2$p_val_adj < 0.01, ]
 
-markers.0.1
+markers.0.2
 ```
 
-**Exercise**: Modify the commands above to check for diferences between clusters 0 and 2, 0 and 13 and 8 and 9.
+**Exercise**: Modify the commands above to check for diferences between clusters 0 and 3, 0 and 4. Also compare clusters and 7 and 13.
 
 <details><summary>Click Here to see the solution</summary>
 
 ```{r}
-markers.0.2 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 2, min.pct=0.25)
-(markers.0.2 <- markers.0.2[ markers.0.2$p_val_adj < 0.01, ])
+markers.0.3 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 3, min.pct=0.25)
+(markers.0.3 <- markers.0.3[ markers.0.3$p_val_adj < 0.01, ])
 
-markers.0.13 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 13, min.pct=0.25)
-(markers.0.13 <- markers.0.13[ markers.0.13$p_val_adj < 0.01, ])
+markers.0.4 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 4, min.pct=0.25)
+(markers.0.4 <- markers.0.4[ markers.0.4$p_val_adj < 0.01, ])
 
-markers.8.9 <- FindMarkers(sobj, ident.1 = 8, ident.2 = 9, min.pct=0.25)
-(markers.8.9 <- markers.8.9[ markers.8.9$p_val_adj < 0.01, ])
+markers.7.13 <- FindMarkers(sobj, ident.1 = 7, ident.2 = 13, min.pct=0.25)
+(markers.7.13 <- markers.7.13[ markers.7.13$p_val_adj < 0.01, ])
 ```
 
 ```{r}
 FeaturePlot(sobj, features.plot = c("Dcn", "Cxcl14"), cols.use = c("grey", "blue"), reduction.use = "tsne")
 ```
 
-It appears that most differences between clusters 0, 1, 2 and 13 are due to mitochondrial RNA. Clusters 8 and 9 however display a larger amount of differentially expressed genes, and might represent different cell populations.
+It appears that most differences between clusters 0, 2, 3 and 4 are due to small differences in the amount of mitochondrial RNA. Clusters 7 and 13 however display a larger amount of differentially expressed genes, and might represent different cell populations.
 
 </details>
 
-We will merge clusters 0, 1, 2 and 13 into a single cluster.
+We will merge clusters 0, 2, 3 and 4 into a single cluster (that we name 16). But first, we save the old cluster ids so we can restore them later if need arises.
 
 ```{r}
+sobj <- StashIdent(sobj, save.name = "OriginalClusterNames")
+
 current.cluster.ids <- c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
-new.cluster.ids <- c(0,0,0,3,4,5,6,7,8,9,10,11,12,0,14,15)
+new.cluster.ids <- c(16,1,16,16,16,5,6,7,8,9,10,11,12,13,14,15)
 sobj@ident <- plyr::mapvalues(sobj@ident, from = current.cluster.ids, to = new.cluster.ids)
 ```
 
@@ -371,17 +393,30 @@ Finally, we run the `FindAllMarkers` function again to account for the new clust
 markers <- FindAllMarkers(object = sobj, only.pos = TRUE, min.pct = 0.25, thresh.use = 0.25)
 markers <- markers[ markers$p_val_adj < 0.01, ]
 
-write.table(markers, file="lung1_markers_fixed.txt")
+write.table(markers, file="lung1_markers_fixed.txt", quote = FALSE)
 ```
+
+```{r, eval=FALSE, echo=FALSE}
+for (x in split(markers, markers$cluster)) {
+  writeLines(x$gene, con=paste0("markers-", x$cluster[1], ".txt"))
+}
+
+writeLines(rownames(sobj@data), con="universe.txt")
+```
+
 
 ```{r, fig.width=8, fig.height=12}
 top.markers <- do.call(rbind, lapply(split(markers, markers$cluster), head))
 DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key = TRUE)
 ```
 
-# Comparison with published results
+# Annotation of cell clusters
 
-We will now compare our results to those from the pusblished study. To do so, we will import the annotated cell assignments from the study and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the annotated cell assignments.
+Now that we have a clear set of 15 clusters and marker genes associated with each cluster, we may start annotating these clusters. 
+
+Tomorrow, we will see how functional analysis can help in this process.
+
+For now, we will import the annotated cell assignments from the study and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the cell assignments from the paper. 
 
 ```{r}
 annotation <- read.table("reference/MCA_CellAssignments.csv", header=TRUE, sep=",")
@@ -394,20 +429,22 @@ sobj@meta.data$Annotation <- gsub("\\(Lung\\)", "", sobj@meta.data$Annotation)
 sobj@meta.data$AnnotationSimple <- gsub("_.*", "", sobj@meta.data$Annotation)
 ```
 
+
+
 ```{r}
 TSNEPlot(sobj, group.by="Annotation", do.label=TRUE, do.return=TRUE) + theme(legend.position = "none") 
 TSNEPlot(sobj, group.by="AnnotationSimple", do.label=TRUE, do.return=TRUE) + theme(legend.position = "none") 
 ```
 
-We can compare our clustering result with the annotated cells by tabulating 
+We can compare our clustering result with the annotated cells by tabulating cluster cell assignments. 
 
-```{r, fig.width=8, fig.height=6}
-library(corrplot)
-
+```{r}
 cluster.comparison <- table(sobj@ident, sobj@meta.data$AnnotationSimple)
-corrplot(cluster.comparison, is.corr = FALSE, method = "number", col="blue")
-```
+mdf <- melt(cluster.comparison, varnames = c("Cluster", "Annotation"), value.name = "Cells")
 
+ggplot(mdf, aes(x=factor(Cluster), y=Annotation)) + 
+  geom_text(aes(label=Cells, alpha=Cells>0))
+```
 
 We can also reproduce figure 4D.
 
