@@ -366,7 +366,7 @@ Eukaryotes contain the extra complication of splicing, where your read will be s
 
 ![Spliced Alignment](images/SplicedAlignment.jpg)
 
-Finally, another set of more recent approaches quickly gaining in popularity map directly against the transcriptome, without the need for a reference genome. [Salmon](https://combine-lab.github.io/salmon/) provides transcript-level estimates of gene expression without explicitly generating alignments. These methods are very fast since they rely on sequence similarity (pseudoalignments) instead of perfect alignments, and because they only search against the transcriptome. Through the use of more elaborate statistical methods they also handle the presence of different alternative splice forms that difficult the attribution of a read to a transcript. Some of these methods, such as salmon, also take explicitly in consideration bias related to differences in transcript length and nucleotide composition.
+Finally, another set of more recent approaches quickly gaining in popularity map directly against the transcriptome, without the need for a reference genome. [Salmon](https://combine-lab.github.io/salmon/) provides transcript-level estimates of gene expression without explicitly generating alignments. These methods are very fast since they rely on sequence similarity (pseudoalignments) instead of perfect alignments, and because they only search against the transcriptome. Through the use of more elaborate statistical methods they also handle the presence of different alternative splice forms that cause difficulties in the attribution of a read to a transcript. Some of these methods, such as salmon, also take explicitly in consideration bias related to differences in transcript length and nucleotide composition.
 
 ## <a id="LO5.3">LO 5.3 - Running an alignment. The SAM/BAM alignment format</a>
 
@@ -387,9 +387,9 @@ The output of these aligners consist of SAM/BAM files. The [Sequence Alignment/M
 **TASK**: Visualize the BAM you generated in Galaxy.
 <br/>
 
-**QUESTION**:: What is the position of the start of the first alignment in your SAM file?
+**QUESTION**:: What is the position of the start of the first alignment in the file you generated in Galaxy (when you visualize the BAM file in Galaxy it shows you the SAM information)?
 <details><summary>Click Here to see the answer</summary><p>
-The first line in the SAM file (after the header section with the lines starting with '@') corresponds to the alignment of the first sequence in the fastq file (HWI-D00418:83:C7G9GANXX:2:2108:16128:97655). It aligns in cromosome 2L, position 18391979, in the reverse orientation (that's what the 16 in the second column means), with a mapping quality of 60. In this particular case, the first 9 bases where not aligned (they were soft clipped).
+The first line in the SAM file (after the long header section with the lines starting with '@') corresponds to the alignment of the sequence with the identifier HWI-D00418:83:C7G9GANXX:2:1314:11646:81987. It aligns in cromosome 2L, position 69393, in the reverse orientation (that's what the 16 in the second column means), with a mapping quality of 60.
 </p></details>
 <br/>
 
@@ -425,7 +425,7 @@ This step generated a SAM file, containing the alignment information like we saw
 
 The BAM file contains exactly the same information as the SAM file, but compressed (like a zip file). Like the SAM file, the BAM file contains information on millions of alignments. For many applications, we need to efficiently extract the alignments in certain regions of the genome (eg. the genes). For this, we can create a BAM index (NOT to be confused with the genome index), which acts like yellow pages to efficiently direct software tools to alignments in specific regions of the genome.
 
-**TASK**: To create the BAM index, the alignments in the bam file need to be sorted by position. For this, run ```samtools sort 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.bam -o 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam```. Finally, we can create the index ```samtools index 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam```. Notice now the appearance of a companion file 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam.bai that contains the index. This file should always accompany its corresponding bam file, as programs will look for the existence of this file.
+**TASK**: To create the BAM index, the alignments in the bam file need to be sorted by position. For this, run ```samtools sort 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.bam 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted```. Finally, we can create the index ```samtools index 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam```. Notice now the appearance of a companion file 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam.bai that contains the index. This file should always accompany its corresponding bam file, as programs will look for the existence of this file.
 <br/>
 
 Using services such as Galaxy, the genome indexing step is hidden from the user. When performing the alignment in Galaxy, you usually have two options: either you provide a fasta with the reference genome, or you select an available pre-built genome. When using an available genome, the indexing step was already performed, while if you provide your own fasta of the genome, an indexing step will have to be performed before the alignment step. If your genome of interest is relatively large (roughly >100Mb), it is more efficient to have it pre-built, particularly if you're reusing it often. For this, you will need to ask the persons managing the service you're using. Moreover, the transformation from SAM to BAM and the BAM indexing steps are usually also transparent.
