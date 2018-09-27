@@ -438,12 +438,11 @@ As we mentioned before, aligners for NGS data depend on large data structures fo
 You can see several files, all starting with 'Drosophila_melanogaster.BDGP6.dna.toplevel.hisat2'. These contain the burrows-wheeler indexes that hisat2 will use to perform the alignment.
 </p></details>
 <br/>
-<br/>
 
 **TASK**: After the genome indexing step, you can now perform the alignment. Make sure the file 20150821.A-2_BGVR_P218_R1.sample.fastq.gz that is inside the fastq_examples folder is in the same folder as your genome index. Now, run the following command: ```hisat2 -x Drosophila_melanogaster.BDGP6.dna.toplevel.hisat2 -U 20150821.A-2_BGVR_P218_R1.sample.fastq.gz > 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sam```.
 <br/>
 
-This step generated a SAM file, containing the alignment information like we saw before.
+This step generated a SAM file, containing the alignment information like we saw before, and which you can open using any text editor or spreadsheet.
 
 **TASK**: We will now transform the SAM file into a BAM file. In the same terminal window where you indexed the genome and performed the alignment using Hisat, run ```samtools view -Sb 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sam > 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.bam```.
 
@@ -452,7 +451,7 @@ The BAM file contains exactly the same information as the SAM file, but compress
 **TASK**: To create the BAM index, the alignments in the bam file need to be sorted by position. For this, run ```samtools sort 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.bam 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted```. Finally, we can create the index ```samtools index 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam```. Notice now the appearance of a companion file 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam.bai that contains the index. This file should always accompany its corresponding bam file, as programs will look for the existence of this file.
 <br/>
 
-Using services such as Galaxy, the genome indexing step is hidden from the user. When performing the alignment in Galaxy, you usually have two options: either you provide a fasta with the reference genome, or you select an available pre-built genome. When using an available genome, the indexing step was already performed, while if you provide your own fasta of the genome, an indexing step will have to be performed before the alignment step. If your genome of interest is relatively large (roughly >100Mb), it is more efficient to have it pre-built, particularly if you're reusing it often. For this, you will need to ask the persons managing the service you're using. Moreover, the transformation from SAM to BAM and the BAM indexing steps are usually also transparent.
+Using services such as Galaxy, the genome indexing step is hidden from the user. When performing the alignment in Galaxy, you usually have two options: either you provide a fasta with the reference genome, or you select an available pre-built genome. When using an available genome, the indexing step was already performed, while if you provide your own fasta of the genome, an indexing step will have to be performed before the alignment step. If your genome of interest is relatively large (roughly >100Mb), it is more efficient to have it pre-built, particularly if you're reusing it often. For this, you will need to ask the persons managing the service you're using. Moreover, the transformation from SAM to BAM and the BAM indexing steps are usually also transparent in Galaxy, where the user only sees the final result.
 <br/>
 
 **TASK**: In Galaxy, run Hisat2 on the 20150821.A-2_BGVR_P218 R1 file (in single-end mode) like you did before, but using as genome the fasta for the Drosophila genome that you downloaded previously (you'll need to upload it into Galaxy). Compare the differences in the time it takes to run Hisat2.
@@ -474,7 +473,7 @@ Most genomes (particularly mamallian genomes) contain areas of low complexity, c
 In the guilgur folder, you'll have data extracted from [Guilgur et al, 2014](https://elifesciences.org/content/3/e02181). In this Drosophila melanogaster dataset, we have two conditions (WT and mut), with two replicates for each (note that nowadays, it is more common to use 3 or more replicates). To make it quick to run, we have extracted data for a very limited set of genes. This data is already of good quality, ready to align.
 <br/>
 
-**TASK**: Create a new empty history to avoid having too many datasets in the same history. In Galaxy, upload all R1 files from the guilgur folder (NOTE: when uploading to Galaxy, explicitly set their type to fastqsanger.gz). Next run Hisat2 on them using the Drosophila genome that is already prebuilt. After finishing, download all BAM files **and** their companion indexes (when clicking on the disk icon, you'll have two files to download, download them both).
+**TASK**: In Galaxy, create a new empty history to avoid having too many datasets in the same history. Then, upload all R1 files from the guilgur folder (NOTE: when uploading to Galaxy, explicitly set their type to fastqsanger.gz). Next run Hisat2 on them using the Drosophila genome that is already prebuilt. After finishing, download all BAM files **and** their companion indexes (when clicking on the disk icon, you'll have two files to download, download them both).
 <br/>
 
 **Hint**: You can rename an item in you history by pressing the Edit Attributes button ![edit](images/edit.jpg). Renaming files may come in handy later.
