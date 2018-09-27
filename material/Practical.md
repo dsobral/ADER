@@ -287,7 +287,7 @@ Sequencing machines often require that you add specific sequences (adaptors) to 
 
 To remove these unwanted sequences, not only you have to look for the sequence in the reads, but also allow for sequencing errors, as well as the presence of incomplete sequences. Another issue of removing the adaptors is that you need to know which ones were used in your data. Since Illumina is used most of the time, these adaptors are already integrated in tools like Trimmomatic, which also take in consideration issues like reverse complement.
 
-**TASK**: In Galaxy, Use Trimmomatic to remove adaptors from sample_adaptors.fastq.gz using Truseq3 adaptors (for this you need to select to perform an initial Illumina clip, then select the appropriate database of adaptors) and use FastQC to see the impact.
+**TASK**: In Galaxy, Use Trimmomatic to remove adaptors from sample_adaptors.fastq.gz using Truseq3 adaptors (for this you need to select to perform an initial Illumina clip, then select the appropriate database of adaptors) and use FastQC to see the impact. Note: although Truseq3 mentions paired-end, you can also use them for single-end.
 
 **QUESTION**: What was the impact of running Trimmomatic?
 <details><summary>Click Here to see the answer</summary><p>
