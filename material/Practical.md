@@ -498,22 +498,24 @@ In the guilgur folder, you'll have data extracted from [Guilgur et al, 2014](htt
 
 # <a id="LO6">Learning Outcome 6: Assess the general quality of the alignments and detect possible problems</a>
 
-## <a id="LO6.1">LO 6.1 - What is a reference gene annotation, versioning and where to obtain</a>
+## <a id="LO6.1">LO 6.1 - What is a reference gene annotation, versioning and where to obtain it</a>
 
-To estimate gene expression, we need to define the genes by identifying their position and structure in the genome. This information is stored in a hierarchical fashion (the genes, their transcripts, each transcript's exons, and so on...) in formats such as the [Generic Feature Format (GFF) files](http://gmod.org/wiki/GFF3). These consist basically of tabular text files with positions of genes (and their components) in the genome (for a specific genome version), as well as other information about the gene such as its name. Another common format used for annotations is the [BED format](http://genome.ucsc.edu/FAQ/FAQformat.html#format1).
+To estimate gene expression, we need to define the genes by identifying their position in the genome. This information is stored in a hierarchical fashion (the genes, their transcripts, each transcript's exons, and so on...) in formats such as the [Generic Feature Format (GFF) files](http://gmod.org/wiki/GFF3). These consist basically of tabular text files with positions of genes (and their components) in the genome (for a specific genome version), as well as other information about the gene such as its name. Another common format used for annotations is the [BED format](http://genome.ucsc.edu/FAQ/FAQformat.html#format1).
 
 Each gene annotation is deeply associated to one given version of the genome (because it contains positions in that genome), but the same genome version may (and usually has) several gene annotation versions. The same way one should keep in detail the version of the genome, we should also take note of the version of the gene annotation being used, and from where and when we obtained it. We also need to make sure we're using a gene version that is compatible with the genome version we used.
 
 Gene annotations are usually complex to create, particularly for large mammalian genomes, and are a permanent work in progress (even more than the genome). Annotation of the Human genes is the work of several large groups of researchers. Other model organisms (such as the mouse) also have dedicated teams to curate their genes. Non-model organisms that are less intensively studied may suffer from having less well characterized annotations, frequently derived from other better studied organisms.
 
-The same way Ensembl is a good source for the genome sequence, it is also a good source to obtain gene annotations. Ensembl even defined a specific derivative of the GFF format (the [GTF](http://www.ensembl.org/info/website/upload/gff.html) format) which is commonly accepted by most applications.
+The same way Ensembl is a good source for the genome sequence, it is also a good source to obtain gene annotations. Ensembl even defined a specific derivative of the GFF format (the [GTF](http://www.ensembl.org/info/website/upload/gff.html) format) which is commonly accepted by most applications. Ensembl is updated roughly every three months. If you download the genome and gene annotation from the same ENSEMBL version, then you're sure to have compatible files, but be aware that in a few months the annotation (or even worse, the genome assembly) may change.
 
-**TASK**: Obtain the latest Drosophila melanogaster GTF from [Ensembl](http://www.ensembl.org), similarly as you obtained the genome.
-
-**QUESTION**:: Upload the GTF you obtained into galaxy and inspect it (using the eye icon). What's the first gene described in the GTF?
+**QUESTION**:: Upload into Galaxy the sample GTF in the guilgur folder and inspect it (using the eye icon). What's the first gene described in the GTF?
 <details><summary>Click Here to see the answer</summary><p>
-It's the gene Myo81F (common name), also known as FBgn0267431 (Flybase identifier), located in chromosome 3R, positions 567076 to 2532932, in the forward strand. You may notice a hierarchical structure, with genes having several transcripts, and each transcript having several exons.
+It's the gene Rpn12R (common name), also known as FBgn0036465 (Flybase identifier), located in chromosome 3L, from positions 15041631 to 15042570, in the forward strand. You may notice a hierarchical structure, with genes having several transcripts, and each transcript having several exons.
 </p></details>
+<br/>
+
+**TASK**: Obtain the latest Drosophila melanogaster GTF from [Ensembl](http://www.ensembl.org), similarly as how you obtained the genome fasta file.
+<br/>
 <br/>
 
 ## <a id="LO6.2">LO 6.2 - Visualizing alignments in IGV for single genes</a>
