@@ -263,7 +263,7 @@ You can perform the following operations with Trimmomatic (either isolated, or i
 </details>
 <br/>
 
-**TASK**:  Upload into Galaxy the the files from fastq_examples folder (Click on the upload icon ![upload](images/upload.jpg) on the top left of the interface). After uploading, you should now seem them on your history in the right panel. You can visualize their content by pressing the view data icon (the eye icon ![eye](images/eye.jpg)). In Galaxy, use Trimmomatic to remove low quality bases from sample_quality_and_adaptors using the default method (a 4bp window average, with a threshold of Q=20). Finally, look at the impact by running FastQC (also in Galaxy) on the trimmed reads.
+**TASK**:  Upload into Galaxy the fastq files from fastq_examples folder (Click on the upload icon ![upload](images/upload.jpg) on the top left of the interface). After uploading, you should now seem them on your history in the right panel. You can visualize their content by pressing the view data icon (the eye icon ![eye](images/eye.jpg)). In Galaxy, use Trimmomatic to remove low quality bases from sample_quality_and_adaptors using the default method (a 4bp window average, with a threshold of Q=20). Finally, look at the impact by running FastQC (also in Galaxy) on the trimmed reads.
 <br/>
 
 **Hint**: When uploading, Galaxy will try to guess the type of your files, but you can also explicitly specify the type of the files when uploading. For example, by default Galaxy will uncompress files when ulpoading, but if you specify that your files are fastqsanger.gz, it will keep them compressed, saving disk space.
@@ -275,7 +275,7 @@ The base quality improved significantly. Nonetheless, several sequences now beca
 </p></details>
 <br/>
 
-**TASK**: Although Galaxy is much simpler to use, it is just hiding some details from you (and sometimes, important details are left out), so if you can, you should invest in learning the detailed command line usage of the tool. In the commandline, use Trimmomatic to remove low quality bases from sample_quality_and_adaptors. Type the command ```TrimmomaticSE -phred33 sample_quality_and_adaptors.fastq.gz sample_quality_and_adaptors.trimmed.fastq.gz SLIDINGWINDOW:4:20```.  You should now have a new file with the trimmed reads. Confirm the effect of Trimmomatic by using FastQC on the file with the trimmed reads.
+**TASK**: Although Galaxy is much simpler to use, it is hiding some details from you (and sometimes, important details are left out), so if you can, you should invest in learning the detailed command line usage of the tool, particularly if you're using it very often. In the commandline, use Trimmomatic to remove low quality bases from sample_quality_and_adaptors. Type the command ```TrimmomaticSE -phred33 sample_quality_and_adaptors.fastq.gz sample_quality_and_adaptors.trimmed.fastq.gz SLIDINGWINDOW:4:20```.  You should now have a new file with the trimmed reads. Confirm the effect of Trimmomatic by using FastQC on the file with the trimmed reads.
 
 <br/>
 <br/>
@@ -295,7 +295,7 @@ There was no effect in the quality of the sequences, since the original per base
 </p></details>
 <br/>
 
-**Hint**: In Trimmomatic you can also use your own sequences as custom adaptors. For example, in case you use uncommon adaptors, or may want to remove polyA tails or other artefactual sequences.
+**Hint**: In Trimmomatic you can also use your own sequences as custom adaptors. For example, in case you use uncommon adaptors, or if you want to remove polyA tails or other artefactual sequences.
 <br/>
 
 **TASK**: As you noticed, you can use Trimmommatic to do both quality and adaptor trimming. In Galaxy, use Trimmomatic to remove low quality bases from sample_quality_and_adaptors.fastq, as well as the remainings of illumina Nextera adaptors that are still left in some of the reads.
@@ -308,7 +308,7 @@ The base pair quality of the sequences improved and the few adaptor sequences we
 
 Paired-end data need to be handled with special care. Reads may be removed entirely if their quality is very bad (eg. if you use the MINLEN parameter in Trimmomatic). This can result in pairing information being lost, if the other member of the pair is not also removed (or placed in a special set of unpaired sequences). Software such as Trimmomatic can also take paired data as input, and handle them properly.
 
-**TASK**: Use Trimmomatic with the 20150821.A-2_BGVR_P218 paired-end example RNA-Seq data with the default SLIDINGWINDOW parameter, as well as MINLEN of 36. Also remove adaptors (use Truseq3 paired-end adaptors). Use FastQC to evaluate the impact of the procedure. If you use trimmomatic on each individual file, you'll lose the pairing information. Therefore, you need to provide the paired data to Trimmomatic. Notice that, beside a paired fastq file, you also obtain unpaired reads that lost their pair.
+**TASK**: Use Trimmomatic with the 20150821.A-2_BGVR_P218 paired-end example RNA-Seq data with the default SLIDINGWINDOW parameter, as well as MINLEN of 36. Also remove adaptors (use Truseq3 paired-end adaptors). Use FastQC to evaluate the impact of the procedure. If you use trimmomatic on each individual file, you'll lose the pairing information. Therefore, you need to provide the paired data to Trimmomatic. Notice that, besides a paired fastq file, you also obtain unpaired reads that lost their pair.
 
 **Question**: Which one has more reads - unpaired R1, or unpaired R2? Why is that?
 <details><summary>Click Here to see the answer</summary><p>
