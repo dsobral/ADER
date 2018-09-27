@@ -335,7 +335,7 @@ The unpaired R1 has a lot more reads than unpaired R2. This is because R2 reads 
 
 # <a id="LO5">Learning Outcome 5: Generate alignments of processed reads against a reference genome</a>
 
-At this stage, we've checked the quality of our raw data, and did any necessary preprocessing, so we should now be ready to use it.
+At this stage, we've checked the quality of our raw data and performed preprocessing if necessary, so we should now be ready to use it.
 
 ## <a id="LO5.1">LO 5.1 - What is a reference genome, versioning and where to obtain genomes</a>
 
