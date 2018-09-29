@@ -351,8 +351,10 @@ Therefore, it is fundamental to keep track of the version of the genome used, as
 
 Finally, another alternative is to use transcript sequences (cDNA) directly as a reference. This is sometimes the only alternative, when full good quality genomes are not available. The presence of multiple alternative transcripts can make the alignment more difficult, but more recent approaches can actually take this information in consideration. We can also select collections of transcripts that are relevant for our analysis (eg. focusing on protein-coding mRNAs, and/or choosing a single representative transcript per gene).
 
-**TASK**: Go to the [Ensembl](http://www.ensembl.org) website and obtain genomic fasta for Drosophila melanogaster (click on the Downloads tab on the top, and then on Download data via FTP). Also download a fasta with cDNA. Take note of the Ensembl version, as well as the version of your genome (in case later you want to integrate data that is not from Ensembl).
+**TASK**: Go to the [Ensembl](http://www.ensembl.org) website and obtain genomic fasta for Drosophila melanogaster (click on the Downloads tab on the top, and then on Download data via FTP). Also download a fasta with cDNA. See note below to understand what you need to download. Take note of the Ensembl version, as well as the version of your genome (in case later you want to integrate data that is not from Ensembl).
 <br/>
+
+**Note**: In Ensembl you will see many files. Particularly, you'll see 3 times what appear the same files, but with a 'rm' a 'sm'. These are masked versions of the genome (rm - repeat masked, sm - soft masked), where repetitive regions of the genome are masked (in rm they are replace by 'N', in sm nucleotides are in lower case).  
 
 ## <a id="LO5.2">LO 5.2 - Alignment software: hisat; bwa; salmon</a>
 
