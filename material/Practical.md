@@ -665,11 +665,11 @@ Finally, how to avoid PCR artifacts? To be as safe as possible, we would remove 
 
   * WT Lib1: 0
 
-  * WT Lib2: 3
+  * WT Lib2: 1
 
-  * mut Lib1: 672
+  * mut Lib1: 219
 
-  * mut Lib2: 734
+  * mut Lib2: 263
 
 </p></details>
 <br/>
@@ -695,11 +695,11 @@ As mentioned previously, Salmon directly matches the raw reads against a fasta w
 
   * WT Lib1: 0
 
-  * WT Lib2: 2
+  * WT Lib2: 1
 
-  * mut Lib1: 687
+  * mut Lib1: 219
 
-  * mut Lib2: 776
+  * mut Lib2: 259
 
 </p></details>
 <br/>
@@ -738,11 +738,11 @@ We now have a table of "raw" reads counts per gene for each sample. Since there 
 
   * WT Lib1: 0
 
-  * WT Lib2: 8.90
+  * WT Lib2: 5.42
 
-  * mut Lib1: 1389.29
+  * mut Lib1: 1114.17
 
-  * mut Lib2: 1422.17
+  * mut Lib2: 1003.84
 
 </p></details>
 <br/>
