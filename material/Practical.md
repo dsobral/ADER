@@ -46,18 +46,6 @@ When sending your samples to a sequencing facility, these are the most frequent 
   * Coverage (number of reads)
 
 </p>
-Eu uso o o MacBook Air antigo da UBI (comprado pelo José Leal provavelmente), para apresentações e skype.
-
-Ontem começou a ficar muito lento e a prender.
-Eu fiz um restart, e ele fica no ecrã inicial do Mac  (cinzento com a maçã), e uma roda eternamente a girar...
-
-Depois de várias tentativas ele passou essa fase, mas continuou muito lento.
-
-Voltei a desligar e agora não passa mesmo do ecrã cinzento.
-
-Isto não me parece muito saudável... será que me podiam dar uma ajudinha com o diagnóstico?
-Obviamente que teve de esperar o Fernando ir embora para o Mac dar problemas...
-Eu vou tentar ver o que consigo fazer, e se tiverem algum 
 <br/>
 
 The following links are a good source of information regarding illumina sequencing technology:
