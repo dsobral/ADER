@@ -577,7 +577,9 @@ The alignment rates were all very high (>=90%). This is because this is a select
 A low alignment rate may be caused by several reasons: the reads may not have been properly quality filtered or may contain artefactual sequence (such as adaptors and polyA tails); there may be contaminants; or an inappropriate reference genome may have been used for alignment. It can be hard to find out if there were contaminations, unless we have an idea of the possible contaminants. Finally, if we didn't use the proper genome, but there is no closer genome available, then there is not much that can be done, except perhaps trying to change parameters in the alignment software to allow for more mismatches (although this may cause biases and an increase in wrong alignments).
 
 Another measure that can be used is the percentage of reads with duplicates (aligning exactly to the same place in the genome). Usually, duplication levels higher than 20% are not a good sign (they're a sign of low amount of sample and PCR artifacts) but again, depends on what you are sequencing and how much. In RNA-Seq it is common to have a small set of genes highly expressed, leading to the presence of duplicates. The histogram of number of duplicates per read will often look bimodal, with most reads being unique and a small subset highly duplicate (mostly from highly expressed genes). Unfortunately it is hard to distinguish PCR artifacts from highly expressed genes. When looking in IGV, PCR artifacts can be easily detected by an uneven coverage of the gene, and the presence of large stacks of duplicated reads. To be safer, one can remove duplicates, but this is not usually done in RNA-Seq, since a lot of valid information may be lost.
-
+<br/>
+**Note**: One way of checking is to plot the number of duplicate reads by gene. If even low expressed genes have a lot of duplicated reads, then this is a sign that your sample may have problems, and you may need to try to remove duplicates.
+<br/>
 There are reports specific for RNA-Seq which depend on gene annotation. One report indicates how well the genes are covered by sequence, which provides a good indication of RNA integrity. One can also check how well the alignments match the known annotation. The presence of a lot of alignments outside annotated genes can mean several things: annotation is not correct (eg. if you're working with a non-model organism); there can be DNA contamination (homogeneous presence of reads in both introns and intergenic); or presence of immature RNA (more intronic, less intergenic).
 <br/>
 ![Positional Bias](images/positional_bias.jpg)
@@ -610,8 +612,11 @@ The Genomic origin indicates reads as being mostly exonic, although in the case 
 </p></details>
 <br/>
 
+**Note**: If you see many reads in intergenic regions, this may be a sign of DNA contamination. One can estimate global contamination by calculating a mean coverage in intergenic regions.
+<br/>
 
 **TASK**: Run qualimap using the command line, using the command: ```qualimap rnaseq -bam mut_lib1_R1.bam -gtf Drosophila_melanogaster.BGP6.85.sample.gtf``` (you may need to adjust the file names and locations). You should see a new folder created, containing the qualimap report in html format.
+<br/>
 <br/>
 
 **NOTE**: Assess how well you achieved the learning outcome. For this, see how well you responded to the different questions during the activities and also make the following questions to yourself.
