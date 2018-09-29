@@ -347,14 +347,20 @@ Moreover, large genomes contain many repetitive elements, which are usually mask
 
 Therefore, it is fundamental to keep track of the version of the genome used, as well as from where (and when) it was obtained. When performing analysis using resources like Galaxy, genomes are often already integrated and available for immediate use. You should always note as much information as possible about the genome you're using and, if in doubt, contact the service providers to find out missing information.
 
-**Note**: You need to register from where you obtained your genome, even if you know the version. For example, if you obtained your genome from UCSC, the chromosome names start with 'chr' (chr1, chr2, ...) while if you obtained from ENSEMBL, the chromosome names do not have 'chr'. Although seemingly innocent, it may make results obtained using UCSC and ENSEMBL genomes hard to integrate (even if made on the same version).  
+
 
 Finally, another alternative is to use transcript sequences (cDNA) directly as a reference. This is sometimes the only alternative, when full good quality genomes are not available. The presence of multiple alternative transcripts can make the alignment more difficult, but more recent approaches can actually take this information in consideration. We can also select collections of transcripts that are relevant for our analysis (eg. focusing on protein-coding mRNAs, and/or choosing a single representative transcript per gene).
 
 **TASK**: Go to the [Ensembl](http://www.ensembl.org) website and obtain genomic fasta for Drosophila melanogaster (click on the Downloads tab on the top, and then on Download data via FTP). Also download a fasta with cDNA. See note below to understand what you need to download. Take note of the Ensembl version, as well as the version of your genome (in case later you want to integrate data that is not from Ensembl).
 <br/>
 
-**Note**: In Ensembl you will see many files. Particularly, you'll see 3 times what appear the same files, but with a 'rm' a 'sm'. These are masked versions of the genome (rm - repeat masked, sm - soft masked), where repetitive regions of the genome are masked (in rm they are replace by 'N', in sm nucleotides are in lower case).  
+**Note**: In Ensembl you will see many genomic files to download. Particularly, you'll see 3 times what appear to be the same files, but with 'rm' and 'sm'. These are masked versions of the genome (rm - repeat masked, sm - soft masked), where repetitive regions of the genome are either replaced by 'N' (in the 'rm' versions) or as lower case (in 'sm'). Repeat masking is an important process particularly for genome annotation and other applications. In RNA-Seq analysis it is usually not recommended to use repeat masked versions. You may also see the sequences of chromosomes separately, but you usually want the full genome in one single file, usually indicated as 'toplevel'. In a few highly studied species, such as Human or Mouse, there may be several alternative sequences (haplotypes) for one same region of the genome. Unless one is specifically interested in these regions, we usually do not want these alternative regions, and therefore should take only the primary assembly. For any doubt, you can read the README file in the Ensembl FTP site.
+<br/>
+
+**Note**: You need to register from where you obtained your genome, even if you know the version. For example, if you obtained your genome from UCSC, the chromosome names start with 'chr' (chr1, chr2, ...) while if you obtained from ENSEMBL, the chromosome names do not have 'chr'. Although seemingly innocent, it may make results obtained using UCSC and ENSEMBL genomes hard to integrate (even if made on the same version).  
+
+<br/>
+<br/>
 
 ## <a id="LO5.2">LO 5.2 - Alignment software: hisat; bwa; salmon</a>
 
