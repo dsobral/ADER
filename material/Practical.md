@@ -585,9 +585,11 @@ Another measure that can be used is the percentage of reads with duplicates (ali
 There are reports specific for RNA-Seq which depend on gene annotation. One report indicates how well the genes are covered by sequence, which provides a good indication of RNA integrity. One can also check how well the alignments match the known annotation. The presence of a lot of alignments outside annotated genes can mean several things: annotation is not correct (eg. if you're working with a non-model organism); there can be DNA contamination (homogeneous presence of reads in both introns and intergenic); or presence of immature RNA (more intronic, less intergenic).
 
 <br/>
+
 ![Positional Bias](images/positional_bias.jpg)
-<br/>
+
 ![Gene Coverage](images/gene_coverage.jpg)
+
 <br/>
 
 The same way FastQC generates reports of fastq files to assess quality of raw data, there are programs that generate global reports on the quality of BAM alignments. One popular tool for this is [qualimap](http://qualimap.bioinfo.cipf.es/).
