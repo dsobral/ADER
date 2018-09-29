@@ -121,18 +121,6 @@ You can see a few fastq files in the folder fastq_examples:
 * sample_adaptors.fastq.gz
 * 20150821.A-2_BGVR_P218_R1.sample.fastq.gz
 * 20150821.A-2_BGVR_P218_R2.sample.fastq.gz
-Eu uso o o MacBook Air antigo da UBI (comprado pelo José Leal provavelmente), para apresentações e skype.
-
-Ontem começou a ficar muito lento e a prender.
-Eu fiz um restart, e ele fica no ecrã inicial do Mac  (cinzento com a maçã), e uma roda eternamente a girar...
-
-Depois de várias tentativas ele passou essa fase, mas continuou muito lento.
-
-Voltei a desligar e agora não passa mesmo do ecrã cinzento.
-
-Isto não me parece muito saudável... será que me podiam dar uma ajudinha com o diagnóstico?
-Obviamente que teve de esperar o Fernando ir embora para o Mac dar problemas...
-Eu vou tentar ver o que consigo fazer, e se tiverem algum 
 
 Since each fastq can have several million reads, they can become very big. Therefore, it is usual to keep them in a compressed format such as gzip. Most recent software dealing with NGS data can directly read compressed fastq files.
 
