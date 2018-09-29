@@ -578,14 +578,18 @@ A low alignment rate may be caused by several reasons: the reads may not have be
 
 Another measure that can be used is the percentage of reads with duplicates (aligning exactly to the same place in the genome). Usually, duplication levels higher than 20% are not a good sign (they're a sign of low amount of sample and PCR artifacts) but again, depends on what you are sequencing and how much. In RNA-Seq it is common to have a small set of genes highly expressed, leading to the presence of duplicates. The histogram of number of duplicates per read will often look bimodal, with most reads being unique and a small subset highly duplicate (mostly from highly expressed genes). Unfortunately it is hard to distinguish PCR artifacts from highly expressed genes. When looking in IGV, PCR artifacts can be easily detected by an uneven coverage of the gene, and the presence of large stacks of duplicated reads. To be safer, one can remove duplicates, but this is not usually done in RNA-Seq, since a lot of valid information may be lost.
 <br/>
+
 **Note**: One way of checking is to plot the number of duplicate reads by gene. If even low expressed genes have a lot of duplicated reads, then this is a sign that your sample may have problems, and you may need to try to remove duplicates.
+
 <br/>
 There are reports specific for RNA-Seq which depend on gene annotation. One report indicates how well the genes are covered by sequence, which provides a good indication of RNA integrity. One can also check how well the alignments match the known annotation. The presence of a lot of alignments outside annotated genes can mean several things: annotation is not correct (eg. if you're working with a non-model organism); there can be DNA contamination (homogeneous presence of reads in both introns and intergenic); or presence of immature RNA (more intronic, less intergenic).
+
 <br/>
 ![Positional Bias](images/positional_bias.jpg)
 <br/>
 ![Gene Coverage](images/gene_coverage.jpg)
 <br/>
+
 The same way FastQC generates reports of fastq files to assess quality of raw data, there are programs that generate global reports on the quality of BAM alignments. One popular tool for this is [qualimap](http://qualimap.bioinfo.cipf.es/).
 
 **TASK**: In the command line, type 'qualimap'. There may be some warnings about missing packages, don't worry about those. From the Qualimap GUI, produce Rna-seq reports (File>New Analysis>RNA Seq QC) using the BAM files of the guilgur dataset. You'll need to use the example gtf file as an annotation.
