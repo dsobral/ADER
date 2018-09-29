@@ -500,6 +500,13 @@ It's the gene Rpn12R (common name), also known as FBgn0036465 (Flybase identifie
 
 **TASK**: Obtain the latest Drosophila melanogaster GTF from [Ensembl](http://www.ensembl.org), similarly as how you obtained the genome fasta file.
 <br/>
+
+**Note**: Like for the genome sequence, you may see several gtf files in Ensembl. Abinitio genes are inferred insilico, and should be avoided, as they are prone to incorrections. Usually one takes the full gtf, although you can also take the ones associated to chromosomes (excluding unplaced scaffolds or alternative haplotypes).  
+<br/>
+
+**Note**: The gtf in Ensembl contains all genes, including non-coding RNAs, pseudogenes, and many alternative splice transcripts. If you want just protein-coding genes, or a single representative for each gene (like RefSeq), then you may need to get it from places like the UCSC [Table Browser](https://genome.ucsc.edu/cgi-bin/hgTables). You will need to be sure to use a compatible genome version.
+
+<br/>
 <br/>
 
 ## <a id="LO6.2">LO 6.2 - Visualizing alignments in IGV for single genes</a>
