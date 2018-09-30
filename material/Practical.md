@@ -1031,7 +1031,7 @@ Genes can be (directly) annotated to multiple GO terms, even within the same asp
 GO annotations of genes are available on an individual basis in most genetic databases, as well as in dedicate GO browsers such as [AmiGO](http://amigo.geneontology.org) and [QuickGO](https://www.ebi.ac.uk/QuickGO). They can also be downloaded on a genome-wide scale from [GO’s annotation repository](http://www.geneontology.org/page/download-annotations) or [BioMart](http://www.ensembl.org/biomart).
 Viewing the annotations of your gene set on an individual gene basis is unfeasible and insufficient: there are too many genes to analyze manually and integrate, and even if you could, this doesn’t tell you how significant the patterns you find are.
 
-**Task**: Go to [BioMart](http://www.ensembl.org/biomart) and download the GO annotations for <i>Drosophila melanogaster</i> and <i>Mus musculus</i>. Select "ENSEMBL Genes 92" database, then "Fruitfly genes" (or "Mouse Genes" for mouse), then under Attributes, select "Gene stable ID", and from the External section, "GO term accession".
+**Task**: Go to [BioMart](http://www.ensembl.org/biomart) and download the GO annotations for <i>Drosophila melanogaster</i> and <i>Mus musculus</i>. Select "ENSEMBL Genes" database, then "Fruitfly genes" (or "Mouse Genes" for mouse), then under Attributes, select "Gene stable ID" (remove the Transcript ID that is selected by default), and from the External section, "GO term accession".
 
 
 ## <a id="LO10.2">LO 10.2 - Understand the concept of functional enrichment analysis, and the statistics involved</a>
