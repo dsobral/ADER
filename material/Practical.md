@@ -1064,15 +1064,19 @@ For some of these tools, you have to provide the version of GO and the GO annota
 
 **Task**: Let's try to apply functional enrichment using the differential expression results you obtained with the Trapnell dataset (you may also get the gene list from the functional_enrichment folder). Use the GOEnrichment tool in Galaxy using as the sample set the differentially expressed genes from Trapnell. For now try without defining a background population set.
 
+<br/>
 
 **QUESTION:** What did you obtain when running the GoEnrichment tool? 
 <details><summary>Click Here to see the answer</summary>
 You obtain one table and one graph for each of the 3 sub-ontologies of the GO (Molecular Function, Biological Process and Celular Component). The table contains the functional enrichment terms that are found to be significant after the Fisher exact test and multiple test correction. It contains the results of these tests, ordered by adjusted p-value. It also contains the genes from the study set that are annotated with the terms. Finally, the graph provides a visual summary of this table, contextualized with all the connections in the GO, where degree of enrichment is displayed using color.
 
+<br/>
 	
 **QUESTION:** Are there significantly enriched terms at 0.01 significance without multiple test corrections? And with the correction? 
 <details><summary>Click Here to see the answer</summary>
 Yes, we see several enriched terms in all categories, even after correction.
+
+<br/>
 
 **QUESTION:** Aren't the differentially expressed genes in Trapnell supposed to be random? How do you explain that you obtained enriched functional terms, even after correction?
 <details><summary>Click Here to see the answer</summary>
