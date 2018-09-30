@@ -1067,21 +1067,22 @@ For some of these tools, you have to provide the version of GO and the GO annota
 <br/>
 
 **QUESTION:** What did you obtain when running the GoEnrichment tool? 
-<details><summary>Click Here to see the answer</summary>
+<details><summary>Click Here to see the answer</summary></p>
 You obtain one table and one graph for each of the 3 sub-ontologies of the GO (Molecular Function, Biological Process and Celular Component). The table contains the functional enrichment terms that are found to be significant after the Fisher exact test and multiple test correction. It contains the results of these tests, ordered by adjusted p-value. It also contains the genes from the study set that are annotated with the terms. Finally, the graph provides a visual summary of this table, contextualized with all the connections in the GO, where degree of enrichment is displayed using color.
-
+</p></details>
 <br/>
 	
 **QUESTION:** Are there significantly enriched terms at 0.01 significance without multiple test corrections? And with the correction? 
-<details><summary>Click Here to see the answer</summary>
+<details><summary>Click Here to see the answer</summary><p>
 Yes, we see several enriched terms in all categories, even after correction.
-
+</p></details>
 <br/>
 
 **QUESTION:** Aren't the differentially expressed genes in Trapnell supposed to be random? How do you explain that you obtained enriched functional terms, even after correction?
-<details><summary>Click Here to see the answer</summary>
+<details><summary>Click Here to see the answer</summary><p>
 In the Trapnell study they used as reference a real expression dataset to make their insilico expression experiment. Therefore, the genes were chosen randomly from a set of expressed genes in a given real experimental setting, and NOT from the full set of genes in the Drosophila genome. This result demonstrates the importance of choosing an appropriate background. 
-
+</p></details>
+<br/>
 
 **Task**: Run again the GOEnrichment, but now using a population set. Use a set of genes that have a numeric adjusted FDR (ie, not 'NA') or non-zero base expression. Now, you should have very few or no enriched functional terms.
 
