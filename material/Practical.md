@@ -998,9 +998,9 @@ The final example we will explore contains several factors, and one of the facto
 
   * Could you use Rstudio to run a differential expression analysis in R?
 
-  * Could you ... ?
+  * Can you see how you can make custom plots adjusted to your specific needs using R?
 
-  * Did you ...?
+  * Can you see that you can make much more complex analysis using R?
 
 <br/>
 <br/>
@@ -1031,9 +1031,7 @@ Genes can be (directly) annotated to multiple GO terms, even within the same asp
 GO annotations of genes are available on an individual basis in most genetic databases, as well as in dedicate GO browsers such as [AmiGO](http://amigo.geneontology.org) and [QuickGO](https://www.ebi.ac.uk/QuickGO). They can also be downloaded on a genome-wide scale from [GO’s annotation repository](http://www.geneontology.org/page/download-annotations) or [BioMart](http://www.ensembl.org/biomart).
 Viewing the annotations of your gene set on an individual gene basis is unfeasible and insufficient: there are too many genes to analyze manually and integrate, and even if you could, this doesn’t tell you how significant the patterns you find are.
 
-**Task**: Go to the [Gene Ontology download page](http://www.geneontology.org/page/downloads). Under GO annotations, download the GO annotation file for <i>Drosophila melanogaster</i>. Under ontology, download the Gene Ontology itself in OBO format (which is less verbose than OWL).
-
-**Task**: Go to [BioMart](http://www.ensembl.org/biomart) and download the GO annotations for <i>Mus musculus</i>. Select "ENSEMBL Genes 92" database, then "Mouse Genes" dataset, then under Attributes, select "Gene stable ID", and from the External section, "GO term accession".
+**Task**: Go to [BioMart](http://www.ensembl.org/biomart) and download the GO annotations for <i>Drosophila melanogaster</i> and <i>Mus musculus</i>. Select "ENSEMBL Genes 92" database, then "Fruitfly genes" (or "Mouse Genes" for mouse), then under Attributes, select "Gene stable ID", and from the External section, "GO term accession".
 
 
 ## <a id="LO10.2">LO 10.2 - Understand the concept of functional enrichment analysis, and the statistics involved</a>
@@ -1064,9 +1062,27 @@ There are several GO enrichment analysis tools available, for instance:
 
 For some of these tools, you have to provide the version of GO and the GO annotations you want to use, in addition to the population and sample sets of genes. For other, you only need to provide the latter, and identify the organism in question. The first set of tools should be preferred, as they give you greater control over what you're testing with. In either case, the sample and population frequencies will be computed automatically by the tool. The tool should exclude from both sets the genes that don’t have GO annotations (of the GO type being tested) and perform the tests independently for each GO type, but not all tools do this.
 
-**Task**: Picking up the differential expression results from the [Trapnell et al](https://raw.githubusercontent.com/dsobral/ADER/master/material/complex/trapnell_GSE32038_gene_exp.diff) example with 300 random differentially expressed <i>Drosophila melanogaster</i> genes, define the sample set and population set of genes for performing functional enrichment analysis. You can use your own EdgeR or DESeq results for this dataset instead of the published differential expression results. You can do the filtering and selection of genes either in a spreadsheet or in Galaxy.
+**Task**: Let's try to apply functional enrichment using the differential expression results you obtained with the Trapnell dataset (you may also get the gene list from the functional_enrichment folder). Use the GOEnrichment tool in Galaxy using as the sample set the differentially expressed genes from Trapnell. For now try without defining a background population set.
 
-**Task**: Using the sample and population files you generated in the previous task, as well as the GO file and <i>Drosophila melanogaster</i> GO annotation file you downloaded earlier, perform functional enrichment analsysis using the GOEnrichment tool in Galaxy, with "Summarize Output" set to off and otherwise default options. Are there significantly enriched terms at 0.01 significance without multiple test corrections? And with the correction?
+
+**QUESTION:** What did you obtain when running the GoEnrichment tool? 
+<details><summary>Click Here to see the answer</summary>
+You obtain one table and one graph for each of the 3 sub-ontologies of the GO (Molecular Function, Biological Process and Celular Component). The table contains the functional enrichment terms that are found to be significant after the Fisher exact test and multiple test correction. It contains the results of these tests, ordered by adjusted p-value. It also contains the genes from the study set that are annotated with the terms. Finally, the graph provides a visual summary of this table, contextualized with all the connections in the GO, where degree of enrichment is displayed using color.
+
+	
+**QUESTION:** Are there significantly enriched terms at 0.01 significance without multiple test corrections? And with the correction? 
+<details><summary>Click Here to see the answer</summary>
+Yes, we see several enriched terms in all categories, even after correction.
+
+**QUESTION:** Aren't the differentially expressed genes in Trapnell supposed to be random? How do you explain that you obtained enriched functional terms, even after correction?
+<details><summary>Click Here to see the answer</summary>
+In the Trapnell study they used as reference a real expression dataset to make their insilico expression experiment. Therefore, the genes were chosen randomly from a set of expressed genes in a given real experimental setting, and NOT from the full set of genes in the Drosophila genome. This result demonstrates the importance of choosing an appropriate background. 
+
+
+**Task**: Run again the GOEnrichment, but now using a population set. Use a set of genes that have a numeric adjusted FDR (ie, not 'NA') or non-zero base expression. Now, you should have very few or no enriched functional terms.
+
+<br/>
+<br/>
 
 **NOTE**: Assess how well you achieved the learning outcome by asking yourself the following questions:
 
