@@ -89,7 +89,7 @@ For this, we are providing small example datasets and exercises that participant
 		Are genomes constant?
 		Obtain genome fasta from Ensembl
 
-#### 	LO 5.2 - Alignment software: hisat2; salmon
+#### 	LO 5.2 - Alignment software: hisat2
 		What are the requisites for using burrows-wheeler approaches?	
 		Prepare a reference genome to use with hisat2
 

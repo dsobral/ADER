@@ -66,13 +66,13 @@ Finally, we also need to consider the amount of material available. Are we deali
 
 ## Designing your experiment for differential expression using RNAseq.
 
-Longer read length, paired-end sequencing and strand-specific library preparation are particularly relevant to reveal gene structure. For example, on a non-model organism for which there is no genome sequenced, or the genes are poorly annotated. They are also relevant when alterative splicing is a factor to take into consideration. Discovering gene structure is a complex process and it would be the subject of an entire course on its own.
+Longer read length, paired-end sequencing and strand-specific library preparation are particularly relevant to reveal gene structure. For example, on a non-model organism for which there is no genome sequenced, or the genes are poorly annotated. They are also relevant when alternative splicing is a factor to take into consideration. Discovering gene structure is a complex process and it would be the subject of an entire course on its own.
 
 For this course, we will focus on the analysis of differential gene expression between conditions, on organisms for which gene annotation is available. Under these conditions, long reads, paired-end, and stranded library preparation methods are not as important. Therefore, for this type of experiments, we can safely go for the cheaper single-end sequencing and shorter read lengths (eg. 50bp or 76bp).
 
 To infer genes differentially expressed between conditions, we need to obtain accurate measures of gene expression variance between the conditions. For this, we need replicates containing as much of the expected biological variance as possible. Chosing the number of replicates and depth of sequencing (number of reads) depends on the experiment. For highly controlled conditions (such as cell cultures), 2-3 replicates could be enough. In terms of coverage, 10-40 million reads should be enough to capture most "reasonably" expressed genes. Nonetheless, to be able to more accurately estimate how much is needed, one should always start from [small pilot datasets](http://scotty.genetics.utah.edu/scotty.php), although in practice this is rarely done.
 
-At IGC we mainly use two library preparation methods (both unstranded): [Smart-seq](https://www.takarabio.com/products/next-generation-sequencing/single-cell-rna-seq/ultra-low-input-mrna-seq-for-illumina) and [QuantSeq](https://www.lexogen.com/quantseq-3mrna-sequencing/). QuantSeq is adequate for "normal" bulk samples (with many cells), it only sequences the ends of the transcripts, and thus requires less reads per sample (because only a small portion of the transcript is sequence). Since it only sequences a small portion of the transcript, it can only be used for differential gene expression analysis. Smart-Seq, on the other hand, sequences full length cDNAs, and it can be used with bulk samples, as well as with samples with very low numbers of cells, including even single-cell. Specific analysis techniques are necessary for samples with very low cell numbers, which we will briefly cover later in the course.
+At IGC we mainly use two library preparation methods (both unstranded): [Smart-seq](https://www.takarabio.com/products/next-generation-sequencing/single-cell-rna-seq/ultra-low-input-mrna-seq-for-illumina) and [QuantSeq](https://www.lexogen.com/quantseq-3mrna-sequencing/). QuantSeq is adequate for "normal" bulk samples (with many cells), it only sequences the ends of the transcripts, requiring less reads per sample (because only a small portion of the transcript is sequenced). Since it only sequences a small portion of the transcript, it can only be used for differential gene expression analysis. Smart-Seq, on the other hand, sequences full length cDNAs, and it can be used with bulk samples, as well as with samples with very low numbers of cells, including even single-cell. Specific analysis techniques are necessary for samples with very low cell numbers, which we will cover later in the course.
 
 
 # <a id="LO2">Learning Outcome 2: List steps in the analysis of RNAseq differential expression experiments</a>
@@ -182,7 +182,7 @@ Other plots indicate biases in nucleotidic content of reads, either globally (as
 
 **QUESTION**: What are the main differences between the reports of sample_adaptors and sample_quality_and_adaptors?
 <details><summary>Click Here to see the answer</summary><p>
-The sample_quality_and_adaptors.fastq.gz file contains 10000 reads of 250bp, while the sample_adaptors.fastq.gz file contains 1000 reads of 76bp. The sample_quality_and_adaptors reads have a lower per base sequence quality at their end, while the reads of the sample_adaptors keep a good quality throughout. The sample_adaptors reads contain a very noticeable nucleotide positional bias particularly after position 36. sample_quality_and_adaptors also contain a bit of nucleotide positional bias, but less and only for the first 10bp. The sample_quality_and_adaptors reads display an apparently bimodal GC distribution, while the sample_adaptors reads seem closer to a single normal distribution. Finally, sample_adaptors contain a clear presence of a known Illumina adaptor after position 36 (probably the reason for the nucleotide positional bias we saw before), while MiSeq_250bp contain a much smaller frequency of another Illumina adaptor towards the ends of the reads.
+The sample_quality_and_adaptors.fastq.gz file contains 10000 reads of 250bp, while the sample_adaptors.fastq.gz file contains 1000 reads of 76bp. The sample_quality_and_adaptors reads have a lower per base sequence quality at their end, while the reads of the sample_adaptors keep a good quality throughout. The sample_adaptors reads contain a very noticeable nucleotide positional bias particularly after position 36. sample_quality_and_adaptors also contain a bit of nucleotide positional bias, but less and only for the first 10bp. The sample_quality_and_adaptors reads display an apparently bimodal GC distribution, while the sample_adaptors reads seem closer to a single normal distribution. Finally, sample_adaptors contain a clear presence of a known Illumina adaptor after position 36 (probably the reason for the nucleotide positional bias we saw before), while sample_quality_and_adaptors contain a much smaller frequency of another Illumina adaptor (Nextera) towards the ends of the reads.
 </p></details>
 <br/>
 
@@ -233,7 +233,7 @@ This serves to exemplify that many reads in current sequencing machines are like
 
 To avoid problems in subsequent analysis, you should remove regions of poor quality in your read, usually by trimming them from the end of reads using tools such as [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic). Similar to FastQC, Trimmomatic is a java program, so you can use it in any operating system (such as Windows and Mac), although unlike FastQC it needs to be run only using the commandline.
 
-Like Trimmomatic, most software for the analysis of HTS data is freely available to users. Nonetheless, they often require the use of the command line (frequently only in a Unix-like environment). User-friendly desktop software such as [CLC](https://www.qiagenbioinformatics.com/products/clc-genomics-workbench/) or [Ugene](http://ugene.net/) is available, but given the quick pace of developmpent in this area, they are constantly outdated. Moreover, even with better algorithms, HTS analysis must often be run in external servers due to the heavy computational requirements. One popular tool is [Galaxy](https://galaxyproject.org/), which allows even non-expert users to execute many different HTS analysis programs through a simple web interface. There are public instances of Galaxy where you can run your bioinformatics analysis (eg. https://usegalaxy.org, https://usegalaxy.eu). At IGC we provide a local Galaxy where you can run the analysis you learn in this course. For the purpose of this course, we will run Galaxy instances locally installed in the classroom workstations. These will contain only the tools necessary to run the exercises for this course, but otherwise work very much any other galaxy installation.
+Like Trimmomatic, most software for the analysis of HTS data is freely available to users. Nonetheless, they often require the use of the command line (frequently only in a Unix-like environment). User-friendly desktop software such as [CLC](https://www.qiagenbioinformatics.com/products/clc-genomics-workbench/) or [Ugene](http://ugene.net/) is available, but given the quick pace of developmpent in this area, they are constantly outdated. Moreover, even with better algorithms, HTS analysis must often be run in external servers due to the heavy computational requirements. One popular tool is [Galaxy](https://galaxyproject.org/), which allows even non-expert users to execute many different HTS analysis programs through a simple web interface. There are public instances of Galaxy where you can run your bioinformatics analysis (eg. https://usegalaxy.org, https://usegalaxy.eu). For the purpose of this course, we will run Galaxy instances locally installed in the classroom workstations. These will contain only the tools necessary to run the exercises for this course, but otherwise work very much like any other galaxy installation. After the course, you can use the public servers, or we can also set up for you a machine with Galaxy with the necessary tools.
 
 **TASK**: Let's use Galaxy to run Trimmomatic. Open the web browser (eg. Firefox). Type [localhost:8080](localhost:8080) in the URL tab (where you put the web addresses). This means that you are accessing a galaxy instance that is running on your local machine. You should see the Galaxy interface on your web browser. The available tools are listed on the left panel, and you can search for tools by their name. Search for trimmomatic in the tool search bar. Click on the tool Trimmomatic to see the options for running the tool.
 
@@ -263,7 +263,7 @@ You can perform the following operations with Trimmomatic (either isolated, or i
 </details>
 <br/>
 
-**TASK**:  Upload into Galaxy the the files from fastq_examples folder (Click on the upload icon ![upload](images/upload.jpg) on the top left of the interface). After uploading, you should now seem them on your history in the right panel. You can visualize their content by pressing the view data icon (the eye icon ![eye](images/eye.jpg)). In Galaxy, use Trimmomatic to remove low quality bases from sample_quality_and_adaptors using the default method (a 4bp window average, with a threshold of Q=20). Finally, look at the impact by running FastQC (also in Galaxy) on the trimmed reads.
+**TASK**:  Upload into Galaxy the fastq files from fastq_examples folder (Click on the upload icon ![upload](images/upload.jpg) on the top left of the interface). After uploading, you should now seem them on your history in the right panel. You can visualize their content by pressing the view data icon (the eye icon ![eye](images/eye.jpg)). In Galaxy, use Trimmomatic to remove low quality bases from sample_quality_and_adaptors using the default method (a 4bp window average, with a threshold of Q=20). Finally, look at the impact by running FastQC (also in Galaxy) on the trimmed reads.
 <br/>
 
 **Hint**: When uploading, Galaxy will try to guess the type of your files, but you can also explicitly specify the type of the files when uploading. For example, by default Galaxy will uncompress files when ulpoading, but if you specify that your files are fastqsanger.gz, it will keep them compressed, saving disk space.
@@ -275,7 +275,7 @@ The base quality improved significantly. Nonetheless, several sequences now beca
 </p></details>
 <br/>
 
-**TASK**: Although Galaxy is much simpler to use, it is just hiding some details from you (and sometimes, important details are left out), so if you can, you should invest in learning the detailed command line usage of the tool. In the commandline, use Trimmomatic to remove low quality bases from sample_quality_and_adaptors. Type the command ```TrimmomaticSE -phred33 sample_quality_and_adaptors.fastq.gz sample_quality_and_adaptors.trimmed.fastq.gz SLIDINGWINDOW:4:20```.  You should now have a new file with the trimmed reads. Confirm the effect of Trimmomatic by using FastQC on the file with the trimmed reads.
+**TASK**: Although Galaxy is much simpler to use, it is hiding some details from you (and sometimes, important details are left out), so if you can, you should invest in learning the detailed command line usage of the tool, particularly if you're using it very often. In the commandline, use Trimmomatic to remove low quality bases from sample_quality_and_adaptors. Type the command ```TrimmomaticSE -phred33 sample_quality_and_adaptors.fastq.gz sample_quality_and_adaptors.trimmed.fastq.gz SLIDINGWINDOW:4:20```.  You should now have a new file with the trimmed reads. Confirm the effect of Trimmomatic by using FastQC on the file with the trimmed reads.
 
 <br/>
 <br/>
@@ -287,7 +287,7 @@ Sequencing machines often require that you add specific sequences (adaptors) to 
 
 To remove these unwanted sequences, not only you have to look for the sequence in the reads, but also allow for sequencing errors, as well as the presence of incomplete sequences. Another issue of removing the adaptors is that you need to know which ones were used in your data. Since Illumina is used most of the time, these adaptors are already integrated in tools like Trimmomatic, which also take in consideration issues like reverse complement.
 
-**TASK**: In Galaxy, Use Trimmomatic to remove adaptors from sample_adaptors.fastq.gz using Truseq3 adaptors (for this you need to select to perform an initial Illumina clip, then select the appropriate database of adaptors) and use FastQC to see the impact.
+**TASK**: In Galaxy, Use Trimmomatic to remove adaptors from sample_adaptors.fastq.gz using Truseq3 adaptors (for this you need to select to perform an initial Illumina clip, then select the appropriate database of adaptors) and use FastQC to see the impact. Note: although Truseq3 mentions paired-end, you can also use them for single-end.
 
 **QUESTION**: What was the impact of running Trimmomatic?
 <details><summary>Click Here to see the answer</summary><p>
@@ -295,7 +295,7 @@ There was no effect in the quality of the sequences, since the original per base
 </p></details>
 <br/>
 
-**Hint**: In Trimmomatic you can also use your own sequences as custom adaptors. For example, in case you use uncommon adaptors, or may want to remove polyA tails or other artefactual sequences.
+**Hint**: In Trimmomatic you can also use your own sequences as custom adaptors. For example, in case you use uncommon adaptors, or if you want to remove polyA tails or other artefactual sequences.
 <br/>
 
 **TASK**: As you noticed, you can use Trimmommatic to do both quality and adaptor trimming. In Galaxy, use Trimmomatic to remove low quality bases from sample_quality_and_adaptors.fastq, as well as the remainings of illumina Nextera adaptors that are still left in some of the reads.
@@ -308,7 +308,7 @@ The base pair quality of the sequences improved and the few adaptor sequences we
 
 Paired-end data need to be handled with special care. Reads may be removed entirely if their quality is very bad (eg. if you use the MINLEN parameter in Trimmomatic). This can result in pairing information being lost, if the other member of the pair is not also removed (or placed in a special set of unpaired sequences). Software such as Trimmomatic can also take paired data as input, and handle them properly.
 
-**TASK**: Use Trimmomatic with the 20150821.A-2_BGVR_P218 paired-end example RNA-Seq data with the default SLIDINGWINDOW parameter, as well as MINLEN of 36. Also remove adaptors (use Truseq3 paired-end adaptors). Use FastQC to evaluate the impact of the procedure. If you use trimmomatic on each individual file, you'll lose the pairing information. Therefore, you need to provide the paired data to Trimmomatic. Notice that, beside a paired fastq file, you also obtain unpaired reads that lost their pair.
+**TASK**: Use Trimmomatic with the 20150821.A-2_BGVR_P218 paired-end example RNA-Seq data with the default SLIDINGWINDOW parameter, as well as MINLEN of 36. Also remove adaptors (use Truseq3 paired-end adaptors). Use FastQC to evaluate the impact of the procedure. If you use trimmomatic on each individual file, you'll lose the pairing information. Therefore, you need to provide the paired data to Trimmomatic. Notice that, besides a paired fastq file, you also obtain unpaired reads that lost their pair.
 
 **Question**: Which one has more reads - unpaired R1, or unpaired R2? Why is that?
 <details><summary>Click Here to see the answer</summary><p>
@@ -335,7 +335,7 @@ The unpaired R1 has a lot more reads than unpaired R2. This is because R2 reads 
 
 # <a id="LO5">Learning Outcome 5: Generate alignments of processed reads against a reference genome</a>
 
-At this stage, we've checked the quality of our raw data, and did any necessary preprocessing, so we should now be ready to use it.
+At this stage, we've checked the quality of our raw data and performed preprocessing if necessary, so we should now be ready to use it.
 
 ## <a id="LO5.1">LO 5.1 - What is a reference genome, versioning and where to obtain genomes</a>
 
@@ -347,11 +347,19 @@ Moreover, large genomes contain many repetitive elements, which are usually mask
 
 Therefore, it is fundamental to keep track of the version of the genome used, as well as from where (and when) it was obtained. When performing analysis using resources like Galaxy, genomes are often already integrated and available for immediate use. You should always note as much information as possible about the genome you're using and, if in doubt, contact the service providers to find out missing information.
 
-**Note**: You need to register from where you obtained your genome, even if you know the version. For example, if you obtained your genome from UCSC, the chromosome names start with 'chr' (chr1, chr2, ...) while if you obtained from ENSEMBL, the chromosome names do not have 'chr'. Although seemingly innocent, it may make results obtained using UCSC and ENSEMBL genomes hard to integrate (even if made on the same version).  
+
 
 Finally, another alternative is to use transcript sequences (cDNA) directly as a reference. This is sometimes the only alternative, when full good quality genomes are not available. The presence of multiple alternative transcripts can make the alignment more difficult, but more recent approaches can actually take this information in consideration. We can also select collections of transcripts that are relevant for our analysis (eg. focusing on protein-coding mRNAs, and/or choosing a single representative transcript per gene).
 
-**TASK**: Go to the [Ensembl](http://www.ensembl.org) website and obtain genomic fasta for Drosophila melanogaster (click on the Downloads tab on the top, and then on Download data via FTP). Also download a fasta with cDNA. Take note of the Ensembl version, as well as the version of your genome (in case later you want to integrate data that is not from Ensembl).
+**TASK**: Go to the [Ensembl](http://www.ensembl.org) website and obtain genomic fasta for Drosophila melanogaster (click on the Downloads tab on the top, and then on Download data via FTP). Also download a fasta with cDNA. See note below to understand what you need to download. Take note of the Ensembl version, as well as the version of your genome (in case later you want to integrate data that is not from Ensembl).
+<br/>
+
+**Note**: In Ensembl you will see many genomic files to download. Particularly, you'll see 3 times what appear to be the same files, but with 'rm' and 'sm'. These are masked versions of the genome (rm - repeat masked, sm - soft masked), where repetitive regions of the genome are either replaced by 'N' (in the 'rm' versions) or as lower case (in 'sm'). Repeat masking is an important process particularly for genome annotation and other applications. In RNA-Seq analysis it is usually not recommended to use repeat masked versions. You may also see the sequences of chromosomes separately, but you usually want the full genome in one single file, usually indicated as 'toplevel'. In a few highly studied species, such as Human or Mouse, there may be several alternative sequences (haplotypes) for one same region of the genome. Unless one is specifically interested in these regions, we usually do not want these alternative regions, and therefore should take only the primary assembly. For any doubt, you can read the README file in the Ensembl FTP site.
+<br/>
+
+**Note**: You need to register from where you obtained your genome, even if you know the version. For example, if you obtained your genome from UCSC, the chromosome names start with 'chr' (chr1, chr2, ...) while if you obtained from ENSEMBL, the chromosome names do not have 'chr'. Although seemingly innocent, it may make results obtained using UCSC and ENSEMBL genomes hard to integrate (even if made on the same version).  
+
+<br/>
 <br/>
 
 ## <a id="LO5.2">LO 5.2 - Alignment software: hisat; bwa; salmon</a>
@@ -366,7 +374,7 @@ Eukaryotes contain the extra complication of splicing, where your read will be s
 
 ![Spliced Alignment](images/SplicedAlignment.jpg)
 
-Finally, another set of more recent approaches quickly gaining in popularity map directly against the transcriptome, without the need for a reference genome. [Salmon](https://combine-lab.github.io/salmon/) provides transcript-level estimates of gene expression without explicitly generating alignments. These methods are very fast since they rely on sequence similarity (pseudoalignments) instead of perfect alignments, and because they only search against the transcriptome. Through the use of more elaborate statistical methods they also handle the presence of different alternative splice forms that difficult the attribution of a read to a transcript. Some of these methods, such as salmon, also take explicitly in consideration bias related to differences in transcript length and nucleotide composition.
+Finally, another set of more recent approaches quickly gaining in popularity map directly against the transcriptome, without the need for a reference genome. [Salmon](https://combine-lab.github.io/salmon/) provides transcript-level estimates of gene expression without explicitly generating alignments. These methods are very fast since they rely on sequence similarity (pseudoalignments) instead of perfect alignments, and because they only search against the transcriptome. Through the use of more elaborate statistical methods they also handle the presence of different alternative splice forms that cause difficulties in the attribution of a read to a transcript. Some of these methods, such as salmon, also take explicitly in consideration bias related to differences in transcript length and nucleotide composition.
 
 ## <a id="LO5.3">LO 5.3 - Running an alignment. The SAM/BAM alignment format</a>
 
@@ -387,9 +395,9 @@ The output of these aligners consist of SAM/BAM files. The [Sequence Alignment/M
 **TASK**: Visualize the BAM you generated in Galaxy.
 <br/>
 
-**QUESTION**:: What is the position of the start of the first alignment in your SAM file?
+**QUESTION**:: What is the position of the start of the first alignment in the file you generated in Galaxy (when you visualize the BAM file in Galaxy it shows you the SAM information)?
 <details><summary>Click Here to see the answer</summary><p>
-The first line in the SAM file (after the header section with the lines starting with '@') corresponds to the alignment of the first sequence in the fastq file (HWI-D00418:83:C7G9GANXX:2:2108:16128:97655). It aligns in cromosome 2L, position 18391979, in the reverse orientation (that's what the 16 in the second column means), with a mapping quality of 60. In this particular case, the first 9 bases where not aligned (they were soft clipped).
+The first line in the SAM file (after the long header section with the lines starting with '@') corresponds to the alignment of the sequence with the identifier HWI-D00418:83:C7G9GANXX:2:1314:11646:81987. It aligns in cromosome 2L, position 69393, in the reverse orientation (that's what the 16 in the second column means), with a mapping quality of 60.
 </p></details>
 <br/>
 
@@ -414,21 +422,20 @@ As we mentioned before, aligners for NGS data depend on large data structures fo
 You can see several files, all starting with 'Drosophila_melanogaster.BDGP6.dna.toplevel.hisat2'. These contain the burrows-wheeler indexes that hisat2 will use to perform the alignment.
 </p></details>
 <br/>
-<br/>
 
 **TASK**: After the genome indexing step, you can now perform the alignment. Make sure the file 20150821.A-2_BGVR_P218_R1.sample.fastq.gz that is inside the fastq_examples folder is in the same folder as your genome index. Now, run the following command: ```hisat2 -x Drosophila_melanogaster.BDGP6.dna.toplevel.hisat2 -U 20150821.A-2_BGVR_P218_R1.sample.fastq.gz > 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sam```.
 <br/>
 
-This step generated a SAM file, containing the alignment information like we saw before.
+This step generated a SAM file, containing the alignment information like we saw before, and which you can open using any text editor or spreadsheet.
 
-**TASK**: We will now transform the SAM file into a BAM file. In the same terminal window where you indexed the genomeand performed the alignment using Hisat, run ```samtools view -Sb 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sam > 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.bam```.
+**TASK**: We will now transform the SAM file into a BAM file. In the same terminal window where you indexed the genome and performed the alignment using Hisat, run ```samtools view -Sb 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sam > 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.bam```.
 
 The BAM file contains exactly the same information as the SAM file, but compressed (like a zip file). Like the SAM file, the BAM file contains information on millions of alignments. For many applications, we need to efficiently extract the alignments in certain regions of the genome (eg. the genes). For this, we can create a BAM index (NOT to be confused with the genome index), which acts like yellow pages to efficiently direct software tools to alignments in specific regions of the genome.
 
-**TASK**: To create the BAM index, the alignments in the bam file need to be sorted by position. For this, run ```samtools sort 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.bam -o 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam```. Finally, we can create the index ```samtools index 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam```. Notice now the appearance of a companion file 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam.bai that contains the index. This file should always accompany its corresponding bam file, as programs will look for the existence of this file.
+**TASK**: To create the BAM index, the alignments in the bam file need to be sorted by position. For this, run ```samtools sort 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.bam 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted```. Finally, we can create the index ```samtools index 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam```. Notice now the appearance of a companion file 20150821.A-2_BGVR_P218_R1.sample.fastq.gz.sorted.bam.bai that contains the index. This file should always accompany its corresponding bam file, as programs will look for the existence of this file.
 <br/>
 
-Using services such as Galaxy, the genome indexing step is hidden from the user. When performing the alignment in Galaxy, you usually have two options: either you provide a fasta with the reference genome, or you select an available pre-built genome. When using an available genome, the indexing step was already performed, while if you provide your own fasta of the genome, an indexing step will have to be performed before the alignment step. If your genome of interest is relatively large (roughly >100Mb), it is more efficient to have it pre-built, particularly if you're reusing it often. For this, you will need to ask the persons managing the service you're using. Moreover, the transformation from SAM to BAM and the BAM indexing steps are usually also transparent.
+Using services such as Galaxy, the genome indexing step is hidden from the user. When performing the alignment in Galaxy, you usually have two options: either you provide a fasta with the reference genome, or you select an available pre-built genome. When using an available genome, the indexing step was already performed, while if you provide your own fasta of the genome, an indexing step will have to be performed before the alignment step. If your genome of interest is relatively large (roughly >100Mb), it is more efficient to have it pre-built, particularly if you're reusing it often. For this, you will need to ask the persons managing the service you're using. Moreover, the transformation from SAM to BAM and the BAM indexing steps are usually also transparent in Galaxy, where the user only sees the final result.
 <br/>
 
 **TASK**: In Galaxy, run Hisat2 on the 20150821.A-2_BGVR_P218 R1 file (in single-end mode) like you did before, but using as genome the fasta for the Drosophila genome that you downloaded previously (you'll need to upload it into Galaxy). Compare the differences in the time it takes to run Hisat2.
@@ -443,18 +450,20 @@ The alignment using the prebuilt genome index took much less time, since the gen
 Most genomes (particularly mamallian genomes) contain areas of low complexity, composed of repetitive sequences. In the case of short reads, sometimes these align to multiple regions in the genome equally well, making it impossible to know where the fragment came from. Longer reads are needed to overcome these difficulties, or in the absence of these, paired-end data can also be used. Some aligners (such as hisat or bwa) can use information from paired reads to help disambiguate some alignments. Information on paired reads is also added to the SAM/BAM file by most aligners when this data is used.
 <br/>
 
-**TASK**: In Galaxy, run Hisat2 with the 20150821.A-2_BGVR_P218 example paired-end data against the prebuilt Drosophila genome. Use the trimmed versions that you did before.
+**TASK**: In Galaxy, run Hisat2 with the 20150821.A-2_BGVR_P218 example paired-end data against the prebuilt Drosophila genome. Use the trimmed versions that you generated before with Trimmomatic.
 <br/>
-
+<br/>
 
 In the guilgur folder, you'll have data extracted from [Guilgur et al, 2014](https://elifesciences.org/content/3/e02181). In this Drosophila melanogaster dataset, we have two conditions (WT and mut), with two replicates for each (note that nowadays, it is more common to use 3 or more replicates). To make it quick to run, we have extracted data for a very limited set of genes. This data is already of good quality, ready to align.
 <br/>
 
-**TASK**: In Galaxy, upload all R1 files from the guilgur folder (NOTE: when uploading to Galaxy, explicitly set their type to fastqsanger.gz). Next run Hisat2 on them using the Drosophila genome that is already prebuilt. After finishing, download all BAM files **and** their companion indexes (when clicking on the disk icon, you'll have two files to download, download them both).
+**TASK**: In Galaxy, create a new empty history to avoid having too many datasets in the same history. Then, upload all R1 files from the guilgur folder (NOTE: when uploading to Galaxy, explicitly set their type to fastqsanger.gz). Next run Hisat2 on them using the Drosophila genome that is already prebuilt. After finishing, download all BAM files **and** their companion indexes (when clicking on the disk icon, you'll have two files to download, download them both).
 <br/>
 
-**Hint**: You may want to create a new empty history to avoid having too many datasets in the same history. You can rename an item in you history by pressing the Edit Attributes button ![edit](images/edit.jpg). Renaming files may come in handy later.
+**Hint**: You can rename an item in you history by pressing the Edit Attributes button ![edit](images/edit.jpg). Renaming files may come in handy later.
 <br/>
+<br/>
+
 
 
 **NOTE**: Assess how well you achieved the learning outcome. For this, see how well you responded to the different questions during the activities and also make the following questions to yourself.
@@ -473,22 +482,31 @@ In the guilgur folder, you'll have data extracted from [Guilgur et al, 2014](htt
 
 # <a id="LO6">Learning Outcome 6: Assess the general quality of the alignments and detect possible problems</a>
 
-## <a id="LO6.1">LO 6.1 - What is a reference gene annotation, versioning and where to obtain</a>
+## <a id="LO6.1">LO 6.1 - What is a reference gene annotation, versioning and where to obtain it</a>
 
-To estimate gene expression, we need to define the genes by identifying their position and structure in the genome. This information is stored in a hierarchical fashion (the genes, their transcripts, each transcript's exons, and so on...) in formats such as the [Generic Feature Format (GFF) files](http://gmod.org/wiki/GFF3). These consist basically of tabular text files with positions of genes (and their components) in the genome (for a specific genome version), as well as other information about the gene such as its name. Another common format used for annotations is the [BED format](http://genome.ucsc.edu/FAQ/FAQformat.html#format1).
+To estimate gene expression, we need to define the genes by identifying their position in the genome. This information is stored in a hierarchical fashion (the genes, their transcripts, each transcript's exons, and so on...) in formats such as the [Generic Feature Format (GFF) files](http://gmod.org/wiki/GFF3). These consist basically of tabular text files with positions of genes (and their components) in the genome (for a specific genome version), as well as other information about the gene such as its name. Another common format used for annotations is the [BED format](http://genome.ucsc.edu/FAQ/FAQformat.html#format1).
 
 Each gene annotation is deeply associated to one given version of the genome (because it contains positions in that genome), but the same genome version may (and usually has) several gene annotation versions. The same way one should keep in detail the version of the genome, we should also take note of the version of the gene annotation being used, and from where and when we obtained it. We also need to make sure we're using a gene version that is compatible with the genome version we used.
 
 Gene annotations are usually complex to create, particularly for large mammalian genomes, and are a permanent work in progress (even more than the genome). Annotation of the Human genes is the work of several large groups of researchers. Other model organisms (such as the mouse) also have dedicated teams to curate their genes. Non-model organisms that are less intensively studied may suffer from having less well characterized annotations, frequently derived from other better studied organisms.
 
-The same way Ensembl is a good source for the genome sequence, it is also a good source to obtain gene annotations. Ensembl even defined a specific derivative of the GFF format (the [GTF](http://www.ensembl.org/info/website/upload/gff.html) format) which is commonly accepted by most applications.
+The same way Ensembl is a good source for the genome sequence, it is also a good source to obtain gene annotations. Ensembl even defined a specific derivative of the GFF format (the [GTF](http://www.ensembl.org/info/website/upload/gff.html) format) which is commonly accepted by most applications. Ensembl is updated roughly every three months. If you download the genome and gene annotation from the same ENSEMBL version, then you're sure to have compatible files, but be aware that in a few months the annotation (or even worse, the genome assembly) may change.
 
-**TASK**: Obtain the latest Drosophila melanogaster GTF from [Ensembl](http://www.ensembl.org), similarly as you obtained the genome.
-
-**QUESTION**:: Upload the GTF you obtained into galaxy and inspect it (using the eye icon). What's the first gene described in the GTF?
+**QUESTION**:: Upload into Galaxy the sample GTF in the guilgur folder and inspect it (using the eye icon). What's the first gene described in the GTF?
 <details><summary>Click Here to see the answer</summary><p>
-It's the gene Myo81F (common name), also known as FBgn0267431 (Flybase identifier), located in chromosome 3R, positions 567076 to 2532932, in the forward strand. You may notice a hierarchical structure, with genes having several transcripts, and each transcript having several exons.
+It's the gene Rpn12R (common name), also known as FBgn0036465 (Flybase identifier), located in chromosome 3L, from positions 15041631 to 15042570, in the forward strand. You may notice a hierarchical structure, with genes having several transcripts, and each transcript having several exons.
 </p></details>
+<br/>
+
+**TASK**: Obtain the latest Drosophila melanogaster GTF from [Ensembl](http://www.ensembl.org), similarly as how you obtained the genome fasta file.
+<br/>
+
+**Note**: Like for the genome sequence, you may see several gtf files in Ensembl. Abinitio genes are inferred insilico, and should be avoided, as they are prone to incorrections. Usually one takes the full gtf, although you can also take the ones associated to chromosomes (excluding unplaced scaffolds or alternative haplotypes).  
+<br/>
+
+**Note**: The gtf in Ensembl contains all genes, including non-coding RNAs, pseudogenes, and many alternative splice transcripts. If you want just protein-coding genes, or a single representative for each gene (like RefSeq), then you may need to get it from places like the UCSC [Table Browser](https://genome.ucsc.edu/cgi-bin/hgTables). You will need to be sure to use a compatible genome version.
+
+<br/>
 <br/>
 
 ## <a id="LO6.2">LO 6.2 - Visualizing alignments in IGV for single genes</a>
@@ -559,13 +577,21 @@ The alignment rates were all very high (>=90%). This is because this is a select
 A low alignment rate may be caused by several reasons: the reads may not have been properly quality filtered or may contain artefactual sequence (such as adaptors and polyA tails); there may be contaminants; or an inappropriate reference genome may have been used for alignment. It can be hard to find out if there were contaminations, unless we have an idea of the possible contaminants. Finally, if we didn't use the proper genome, but there is no closer genome available, then there is not much that can be done, except perhaps trying to change parameters in the alignment software to allow for more mismatches (although this may cause biases and an increase in wrong alignments).
 
 Another measure that can be used is the percentage of reads with duplicates (aligning exactly to the same place in the genome). Usually, duplication levels higher than 20% are not a good sign (they're a sign of low amount of sample and PCR artifacts) but again, depends on what you are sequencing and how much. In RNA-Seq it is common to have a small set of genes highly expressed, leading to the presence of duplicates. The histogram of number of duplicates per read will often look bimodal, with most reads being unique and a small subset highly duplicate (mostly from highly expressed genes). Unfortunately it is hard to distinguish PCR artifacts from highly expressed genes. When looking in IGV, PCR artifacts can be easily detected by an uneven coverage of the gene, and the presence of large stacks of duplicated reads. To be safer, one can remove duplicates, but this is not usually done in RNA-Seq, since a lot of valid information may be lost.
+<br/>
 
+**Note**: One way of checking is to plot the number of duplicate reads by gene. If even low expressed genes have a lot of duplicated reads, then this is a sign that your sample may have problems, and you may need to try to remove duplicates.
+
+<br/>
 There are reports specific for RNA-Seq which depend on gene annotation. One report indicates how well the genes are covered by sequence, which provides a good indication of RNA integrity. One can also check how well the alignments match the known annotation. The presence of a lot of alignments outside annotated genes can mean several things: annotation is not correct (eg. if you're working with a non-model organism); there can be DNA contamination (homogeneous presence of reads in both introns and intergenic); or presence of immature RNA (more intronic, less intergenic).
+
 <br/>
+
 ![Positional Bias](images/positional_bias.jpg)
-<br/>
+
 ![Gene Coverage](images/gene_coverage.jpg)
+
 <br/>
+
 The same way FastQC generates reports of fastq files to assess quality of raw data, there are programs that generate global reports on the quality of BAM alignments. One popular tool for this is [qualimap](http://qualimap.bioinfo.cipf.es/).
 
 **TASK**: In the command line, type 'qualimap'. There may be some warnings about missing packages, don't worry about those. From the Qualimap GUI, produce Rna-seq reports (File>New Analysis>RNA Seq QC) using the BAM files of the guilgur dataset. You'll need to use the example gtf file as an annotation.
@@ -592,8 +618,11 @@ The Genomic origin indicates reads as being mostly exonic, although in the case 
 </p></details>
 <br/>
 
+**Note**: If you see many reads in intergenic regions, this may be a sign of DNA contamination. One can estimate global contamination by calculating a mean coverage in intergenic regions.
+<br/>
 
 **TASK**: Run qualimap using the command line, using the command: ```qualimap rnaseq -bam mut_lib1_R1.bam -gtf Drosophila_melanogaster.BGP6.85.sample.gtf``` (you may need to adjust the file names and locations). You should see a new folder created, containing the qualimap report in html format.
+<br/>
 <br/>
 
 **NOTE**: Assess how well you achieved the learning outcome. For this, see how well you responded to the different questions during the activities and also make the following questions to yourself.
@@ -636,11 +665,11 @@ Finally, how to avoid PCR artifacts? To be as safe as possible, we would remove 
 
   * WT Lib1: 0
 
-  * WT Lib2: 3
+  * WT Lib2: 1
 
-  * mut Lib1: 672
+  * mut Lib1: 219
 
-  * mut Lib2: 734
+  * mut Lib2: 263
 
 </p></details>
 <br/>
@@ -666,11 +695,11 @@ As mentioned previously, Salmon directly matches the raw reads against a fasta w
 
   * WT Lib1: 0
 
-  * WT Lib2: 2
+  * WT Lib2: 1
 
-  * mut Lib1: 687
+  * mut Lib1: 219
 
-  * mut Lib2: 776
+  * mut Lib2: 259
 
 </p></details>
 <br/>
@@ -709,11 +738,11 @@ We now have a table of "raw" reads counts per gene for each sample. Since there 
 
   * WT Lib1: 0
 
-  * WT Lib2: 8.90
+  * WT Lib2: 5.42
 
-  * mut Lib1: 1389.29
+  * mut Lib1: 1114.17
 
-  * mut Lib2: 1422.17
+  * mut Lib2: 1003.84
 
 </p></details>
 <br/>
@@ -817,9 +846,11 @@ The samples sharing the genotype are clearly closer together.
 <br/>
 
 
-**TASK**: In Galaxy, use DESeq2 with the salmon results you obtained previously for the guilgur data. Do the same as with the htseq-count results, but now choose as "Choice of Input Data" the option TPM values. You'll need to map transcripts to genes, and for this choose the "Gene Mapping Format" Transcript-ID and Gene-ID mapping, and select the file 'Drosophila_melanogaster.BDGP6.88.sample.cdna.tr_to_gene.tab'. Compare the results with what you obtained previously.
+**TASK**: In Galaxy, use DESeq2 with the salmon results you obtained previously for the guilgur data. Do the same as with the featureCounts results, but now choose as "Choice of Input Data" the option TPM values. Use the transcript counts, and then to  map transcripts to genes choose the "Gene Mapping Format" Transcript-ID and Gene-ID mapping, and select the file 'Drosophila_melanogaster.BDGP6.88.sample.cdna.tr_to_gene.tab'. Compare the results with what you obtained previously.
 <br/>
 <br/>
+
+### Let's recapitulate everything we did so far with a real-sized dataset
 
 To have a dataset with a more realistic size, we will also use data from Trapnell and colleagues [(Trapnell et. al, 2012)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3334321/), where the authors created an artificial Drosophila melanogaster dataset with 2 conditions and 3 replicates each, where 300 randomly selected genes (from the set of genes expressed) were perturbed in-silico. The original "raw" data and processed files can be found [here](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE32038).
 <br/>
@@ -948,6 +979,9 @@ The following exercises are designed to illustrate the use of two of the most co
 
 **TASK**: Open RStudio on your computer. Using the R console, perform the steps described in this document: [Exercise 1](http://htmlpreview.github.io/?https://github.com/dsobral/ADER/blob/master/material/complex/tutorial1.html)
 
+**Note**: You may get slightly (or not so slightly) different results from what you obtained in Galaxy. This may be due to several different reasons. The most likely reason is that you're not running exactly the same code as in Galaxy. Finding and interpreting exactly the code that is run in Galaxy may not be an easy task for many people. Another reason (often ignored) is that you may be running different versions (of R, of DESeq2/edgeR or even of other dependent packages). In R, you should run `sessioninfo()` to have information on the versions you're using.
+
+
 In the second exercise we will perform a differential expression analysis of the Tuch et al. dataset. This example aims to demonstrate the steps necessary to use edgeR's GLM functions, that are applicable both to a simple pairwise comparison, as well as more complex designs.
 
 **TASK**: Open RStudio on your computer. Using the R console, perform the steps described in this document: [Exercise 2](http://htmlpreview.github.io/?https://github.com/dsobral/ADER/blob/master/material/complex/tutorial2.html)
@@ -967,9 +1001,9 @@ The final example we will explore contains several factors, and one of the facto
 
   * Could you use Rstudio to run a differential expression analysis in R?
 
-  * Could you ... ?
+  * Can you see how you can make custom plots adjusted to your specific needs using R?
 
-  * Did you ...?
+  * Can you see that you can make much more complex analysis using R?
 
 <br/>
 <br/>
@@ -1000,9 +1034,7 @@ Genes can be (directly) annotated to multiple GO terms, even within the same asp
 GO annotations of genes are available on an individual basis in most genetic databases, as well as in dedicate GO browsers such as [AmiGO](http://amigo.geneontology.org) and [QuickGO](https://www.ebi.ac.uk/QuickGO). They can also be downloaded on a genome-wide scale from [GO’s annotation repository](http://www.geneontology.org/page/download-annotations) or [BioMart](http://www.ensembl.org/biomart).
 Viewing the annotations of your gene set on an individual gene basis is unfeasible and insufficient: there are too many genes to analyze manually and integrate, and even if you could, this doesn’t tell you how significant the patterns you find are.
 
-**Task**: Go to the [Gene Ontology download page](http://www.geneontology.org/page/downloads). Under GO annotations, download the GO annotation file for <i>Drosophila melanogaster</i>. Under ontology, download the Gene Ontology itself in OBO format (which is less verbose than OWL).
-
-**Task**: Go to [BioMart](http://www.ensembl.org/biomart) and download the GO annotations for <i>Mus musculus</i>. Select "ENSEMBL Genes 92" database, then "Mouse Genes" dataset, then under Attributes, select "Gene stable ID", and from the External section, "GO term accession".
+**Task**: Go to [BioMart](http://www.ensembl.org/biomart) and download the GO annotations for <i>Drosophila melanogaster</i> and <i>Mus musculus</i>. Select "ENSEMBL Genes" database, then "Fruitfly genes" (or "Mouse Genes" for mouse), then under Attributes, select "Gene stable ID" (remove the Transcript ID that is selected by default), and from the External section, "GO term accession".
 
 
 ## <a id="LO10.2">LO 10.2 - Understand the concept of functional enrichment analysis, and the statistics involved</a>
@@ -1033,9 +1065,32 @@ There are several GO enrichment analysis tools available, for instance:
 
 For some of these tools, you have to provide the version of GO and the GO annotations you want to use, in addition to the population and sample sets of genes. For other, you only need to provide the latter, and identify the organism in question. The first set of tools should be preferred, as they give you greater control over what you're testing with. In either case, the sample and population frequencies will be computed automatically by the tool. The tool should exclude from both sets the genes that don’t have GO annotations (of the GO type being tested) and perform the tests independently for each GO type, but not all tools do this.
 
-**Task**: Picking up the differential expression results from the [Trapnell et al](https://raw.githubusercontent.com/dsobral/ADER/master/material/complex/trapnell_GSE32038_gene_exp.diff) example with 300 random differentially expressed <i>Drosophila melanogaster</i> genes, define the sample set and population set of genes for performing functional enrichment analysis. You can use your own EdgeR or DESeq results for this dataset instead of the published differential expression results. You can do the filtering and selection of genes either in a spreadsheet or in Galaxy.
+**Task**: Let's try to apply functional enrichment using the differential expression results you obtained with the Trapnell dataset (you may also get the gene list from the functional_enrichment folder). Use the GOEnrichment tool in Galaxy using as the sample set the differentially expressed genes from Trapnell. For now try without defining a background population set.
 
-**Task**: Using the sample and population files you generated in the previous task, as well as the GO file and <i>Drosophila melanogaster</i> GO annotation file you downloaded earlier, perform functional enrichment analsysis using the GOEnrichment tool in Galaxy, with "Summarize Output" set to off and otherwise default options. Are there significantly enriched terms at 0.01 significance without multiple test corrections? And with the correction?
+<br/>
+
+**QUESTION:** What did you obtain when running the GoEnrichment tool? 
+<details><summary>Click Here to see the answer</summary></p>
+You obtain one table and one graph for each of the 3 sub-ontologies of the GO (Molecular Function, Biological Process and Celular Component). The table contains the functional enrichment terms that are found to be significant after the Fisher exact test and multiple test correction. It contains the results of these tests, ordered by adjusted p-value. It also contains the genes from the study set that are annotated with the terms. Finally, the graph provides a visual summary of this table, contextualized with all the connections in the GO, where degree of enrichment is displayed using color.
+</p></details>
+<br/>
+	
+**QUESTION:** Are there significantly enriched terms at 0.01 significance without multiple test corrections? And with the correction? 
+<details><summary>Click Here to see the answer</summary><p>
+Yes, we see several enriched terms in all categories, even after correction.
+</p></details>
+<br/>
+
+**QUESTION:** Aren't the differentially expressed genes in Trapnell supposed to be random? How do you explain that you obtained enriched functional terms, even after correction?
+<details><summary>Click Here to see the answer</summary><p>
+In the Trapnell study they used as reference a real expression dataset to make their insilico expression experiment. Therefore, the genes were chosen randomly from a set of expressed genes in a given real experimental setting, and NOT from the full set of genes in the Drosophila genome. This result demonstrates the importance of choosing an appropriate background. 
+</p></details>
+<br/>
+
+**Task**: Run again the GOEnrichment, but now using a population set. Use a set of genes that have a numeric adjusted FDR (ie, not 'NA') or non-zero base expression. Now, you should have very few or no enriched functional terms.
+
+<br/>
+<br/>
 
 **NOTE**: Assess how well you achieved the learning outcome by asking yourself the following questions:
 
