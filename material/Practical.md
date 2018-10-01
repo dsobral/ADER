@@ -979,6 +979,9 @@ The following exercises are designed to illustrate the use of two of the most co
 
 **TASK**: Open RStudio on your computer. Using the R console, perform the steps described in this document: [Exercise 1](http://htmlpreview.github.io/?https://github.com/dsobral/ADER/blob/master/material/complex/tutorial1.html)
 
+**Note**: You may get slightly (or not so slightly) different results from what you obtained in Galaxy. This may be due to several different reasons. The most likely reason is that you're not running exactly the same code as in Galaxy. Finding and interpreting exactly the code that is run in Galaxy may not be an easy task for many people. Another reason (often ignored) is that you may be running different versions (of R, of DESeq2/edgeR or even of other dependent packages). In R, you should run `sessioninfo()` to have information on the versions you're using.
+
+
 In the second exercise we will perform a differential expression analysis of the Tuch et al. dataset. This example aims to demonstrate the steps necessary to use edgeR's GLM functions, that are applicable both to a simple pairwise comparison, as well as more complex designs.
 
 **TASK**: Open RStudio on your computer. Using the R console, perform the steps described in this document: [Exercise 2](http://htmlpreview.github.io/?https://github.com/dsobral/ADER/blob/master/material/complex/tutorial2.html)
