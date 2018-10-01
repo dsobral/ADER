@@ -1,22 +1,13 @@
-## Overview of Single Cell RNA-seq
+## LO 9.1: Overview of Single Cell RNA-seq (scRNA-seq)
 
-*Bulk* RNA-seq captures only an "average" of the expression profiles of thousands of cells. By contrast, *single cell* RNA-seq (scRNA-seq) allows the capture of individual measurements across *thousands* of single cells.
+*Bulk* RNA-seq captures only an "average" of the expression profiles of thousands of cells. By contrast, *single cell* RNA-seq (scRNA-seq) allows the capture of individual measurements across dozens and up to *thousands* of single cells.
 
-These techniques allow:
-
-- Understanding of cell-to-cell heterogeneity;
-- Tracing of differentiation pathways;
-- Modelling transcriptional dynamics.
-
-For an overview of scRNA-seq applications see
+These techniques allow among others, understanding of cell-to-cell heterogeneity, tracing of differentiation pathways, modelling transcriptional dynamics. For an overview of scRNA-seq applications see
 [Liu, F1000Research (2016)](https://f1000research.com/articles/5-182/v1), [Griffiths *et al.*, molecular systems biology (2018)](https://onlinelibrary.wiley.com/doi/full/10.15252/msb.20178046).
 
-Challenges of scRNA-seq data analysis
+scRNA-seq always starts with the collection of individual cells
 
-- Lower depth than bulk RNA-seq
-- High amount of zeros (also called *dropouts*)
-- High variability
-- High dimensionality
+![](images/singlecell_collection.png)
 
 ## Chromium System (10x Genomics)
 
@@ -34,6 +25,13 @@ Sequencing is done in paired end-mode and, unlike in bulk RNA-seq, the number of
 [Chromium Single Cell Gene Expression Solution](https://www.10xgenomics.com/solutions/single-cell/)
 
 ## Single Cell Data Analysis
+
+scRNA-seq data analysis presents a number of challenges, many of which are still the focus of active research, such as:
+
+- High dimensionality;
+- Lower depth than bulk RNA-seq;
+- High amount of zeros (also called *dropouts*);
+- High variability.
 
 Conceptually, the analysis of a scRNA-seq sample for the purpose of identifying and characterizing cell subpopulations, starts with preprocessing of raw reads, then reads are mapped to a reference genome and quantified in an *UMI count matrix*. Downstream analyses of this count matrix allow the identification and characterization of subpopulations of cells.
 
@@ -86,16 +84,16 @@ Bias, robustness and scalability in single-cell differential expression analysis
 
 In this tutorial, we will go through the basic steps of a *single sample* single-cell analysis.
 
-1. Perform quality control of raw data.
-2. Obtain a *UMI* count matrix with `cellranger`.
-3. Perform downstream analyses.
+1. Do quality control of raw data.
+2. Obtain a *UMI* count matrix with either `cellranger` or `Dropseq-tools`.
+3. Perform downstream analysis of the count matrix:
    - Filter barcodes and genes.
    - Normalize the raw UMI counts.
    - Perform dimensionality reduction (PCA, t-SNE).
    - Cluster cell subpopulations.
    - Perform differential gene expression to determine subpopulation marker genes.
 
-### LO XX: Use `cellranger` to obtain an UMI count matrix for a 10x dataset
+### LOXX: Use `cellranger` to obtain an UMI count matrix from a set of FastQ files
 
 For this task we will use an example dataset available from the 10x Genomics website.
 
@@ -107,11 +105,13 @@ For this task we will use an example dataset available from the 10x Genomics web
 > - Sequenced on Illumina Hiseq4000 with approximately 87,000 reads per cell
 > - 26bp read1 (16bp Chromium barcode and 10bp UMI), 98bp read2 (transcript), and 8bp I7 sample barcode
 
-This dataset was obtained using Chromium Single Cell 3' v2 chemistry (https://support.10xgenomics.com/single-cell-gene-expression/index/doc/specifications-sequencing-requirements-for-single-cell-3) and sequenced on a Illumina Hiseq4000.
+This dataset was generated using Chromium Single Cell 3' v2 chemistry (https://support.10xgenomics.com/single-cell-gene-expression/index/doc/specifications-sequencing-requirements-for-single-cell-3) and sequenced on a Illumina Hiseq4000.
 
-We will also need a reference genome. Genomes for human and mouse, pre-indexed and ready to be used with the STAR aligner, can be also be downloaded from the 10x Genomics webite: https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest.
+We will also need a reference genome. `cellranger` uses the [STAR](https://github.com/alexdobin/STAR) aligner to map reads to a reference genome. Genomes for human and mouse, pre-indexed and ready to be used with STAR, can be downloaded from the 10x Genomics webite: https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest.
 
-*Note: In these task we will use a small subset the full dataset consisting of 1M reads, and a genome reference of just human chromosome 1, since the full dataset takes ~14 hours to process using 8 cores and 32Gb of RAM.*
+*Note: You don't need to download a reference genome now, as one is already provided for the course. *
+
+*Note: In this task we will use a small subset the full dataset consisting of 1M reads, and a genome reference of just human chromosome 1, since the full dataset takes ~14 hours to process using 8 cores and 32Gb of RAM.*
 
 ### Evaluate sample quality
 
@@ -140,7 +140,7 @@ cd count_pratical
 
 ```
 export PATH=software/cellranger-2.1.1:$PATH
-source sourceme.bash
+source software/cellranger-2.1.1/sourceme.bash
 ```
 
 Run `cellranger count` specifying the output folder id (--id), the transcriptome reference (--transcriptome), the folder containing the fastqs to process (--fastqs) and the name of the sample to process (--sample). It is recommended to also specify the approximate number of cells expected to be contained in the same (--expect-cells). To skip secondary analysis we add --nosecondary to the command.
@@ -336,19 +336,28 @@ At this point we have generated **two** important files that are essential to pr
 - `output_dropseq/lung1_sample_unaligned_filtered_trimmed.fastq`: this contains just the mRNA sequences in standard FastQ format and can be used for mapping.
 - `output_dropseq/lung1_sample_unaligned_filtered_trimmed.bam`: this contains both the mRNA sequences as well as the associated cell barcode and unique molecule idenfier for each read.
 
-#### 2.1 STAR
+#### 2.1 hisat2
 
-We are now ready to map the reads to a reference genome or transcriptome. Here we use the [STAR](https://github.com/alexdobin/STAR) aligner to map the reads to the mouse genome (mm10). The genome must be properly indexed to use with with STAR. Here we are using a pre-indexed genome that was downloaded from the 10x Genomics website (https://support.10xgenomics.com/single-cell-gene-expression/software/downloads/latest).
+We are now ready to map the reads to a reference genome or transcriptome. As before in this course, we will use the hisat2 aligner for this task. A pre-indexed *Mus musculus* (mm10) genome is provided in the `reference` folder.
 
 ```
-mkdir -p output_dropseq/STAR
-software/STAR-2.6.1b/bin/Linux_x86_64/STAR --runThreadN 8 --genomeDir reference/refdata-cellranger-mm10-1.2.0/star --readFilesIn output_dropseq/lung1_sample_unaligned_filtered_trimmed.fastq --outFileNamePrefix output_dropseq/STAR/star --outSAMtype BAM SortedByCoordinate
+mkdir -p output_dropseq/Bams
+software/hisat2-2.1.0/hisat2 -q -p 8 --new-summary --summary-file output_dropseq/Bams/maplog.log -x reference/hisat2-mm10 -U output_dropseq/lung1_sample_unaligned_filtered_trimmed.fastq > output_dropseq/Bams/mapped.sam
+```
+
+We convert the sam file to a bam file and sort it by coordinate.
+
+```
+samtools view -bS output_dropseq/Bams/mapped.sam > output_dropseq/Bams/mapped.bam
+samtools sort output_dropseq/Bams/mapped.bam > output_dropseq/Bams/mapped.sorted.bam
+samtools index output_dropseq/Bams/mapped.sorted.bam
+rm output_dropseq/Bams/mapped.sam output_dropseq/Bams/mapped.bam
 ```
 
 A summary of the mapping procedure is provided.
 
 ```
-cat output_dropseq/STAR/starLog.final.out
+cat output_dropseq/Bams/maplog.log
 ```
 
 #### 2.3 MergeBamAlignment
@@ -356,15 +365,15 @@ cat output_dropseq/STAR/starLog.final.out
 Now the file `starAligned.sortedByCoord.out.bam` contains the aligned reads. However, in the process we lost the information about the cell barcodes and UMI. We can still recover this information from the unaligned bam file we generated previously. In the following commands we merge the information from the unaligned bam file with the newly generated alignments.
 
 ```
-java -jar software/picard.jar SortSam I=output_dropseq/STAR/starAligned.sortedByCoord.out.bam O=output_dropseq/STAR/starAligned.sortedByQueryname.bam SORT_ORDER=queryname
+java -jar software/picard.jar SortSam I=output_dropseq/Bams/mapped.sorted.bam O=output_dropseq/Bams/mapped.sorted.query.bam SORT_ORDER=queryname
 java -jar software/picard.jar CreateSequenceDictionary REFERENCE=reference/refdata-cellranger-mm10-1.2.0/fasta/genome.fa OUTPUT=reference/refdata-cellranger-mm10-1.2.0/fasta/genome.dict
-java -jar software/picard.jar MergeBamAlignment REFERENCE_SEQUENCE=reference/refdata-cellranger-mm10-1.2.0/fasta/genome.fa UNMAPPED_BAM=output_dropseq/lung1_sample_unaligned_filtered_trimmed.bam ALIGNED_BAM=output_dropseq/STAR/starAligned.sortedByQueryname.bam OUTPUT=output_dropseq/starAligned.merged.bam INCLUDE_SECONDARY_ALIGNMENTS=false PAIRED_RUN=false
+java -jar software/picard.jar MergeBamAlignment REFERENCE_SEQUENCE=reference/refdata-cellranger-mm10-1.2.0/fasta/genome.fa UNMAPPED_BAM=output_dropseq/lung1_sample_unaligned_filtered_trimmed.bam ALIGNED_BAM=output_dropseq/Bams/mapped.sorted.query.bam OUTPUT=output_dropseq/Aligned.merged.bam INCLUDE_SECONDARY_ALIGNMENTS=false PAIRED_RUN=false
 ```
 
 Notice we have now recovered and associated the cell barcodes and UMI to each aligned read through the *XC* and *XM* tags.
 
 ```
-samtools view output_dropseq/starAligned.merged.bam | head
+samtools view output_dropseq/Aligned.merged.bam | head
 ```
 
 #### 2.4 BAMTagHistogram
@@ -372,7 +381,7 @@ samtools view output_dropseq/starAligned.merged.bam | head
 The following command can be used to generate a histogram of absolute number of reads per cell barcode. This allows us to make a first (rough) estimate of the number of cells in our dataset.
 
 ```
-BAMTagHistogram I=output_dropseq/starAligned.merged.bam O=output_dropseq/read_counts.txt TAG=XC
+BAMTagHistogram I=output_dropseq/Aligned.merged.bam O=output_dropseq/read_counts.txt TAG=XC
 ```
 
 In **RStudio** set your working directory to the dropseq project directory, and run the following commands to generate the plot below.
@@ -409,13 +418,13 @@ We are now ready to proceed to the UMI counting step. If we wanted to quantify r
 We add a bam tag to each mapped read indicating if that read is overlapping any annotated exon.
 
 ```
-TagReadWithGeneExon I=output_dropseq/starAligned.merged.bam O=output_dropseq/starAligned.merged.exons.bam ANNOTATIONS_FILE=reference/refdata-cellranger-mm10-1.2.0/genes/genes.gtf TAG=GE
+TagReadWithGeneExon I=output_dropseq/Aligned.merged.bam O=output_dropseq/Aligned.merged.exons.bam ANNOTATIONS_FILE=reference/refdata-cellranger-mm10-1.2.0/genes/genes.gtf TAG=GE
 ```
 
 Reads overlapping exons will be tagged with a *GE* tag:
 
 ```
-samtools view output_dropseq/starAligned.merged.exons.bam | grep "GE:" | head
+samtools view output_dropseq/Aligned.merged.exons.bam | grep "GE:" | head
 ```
 
 ### 3.2 DigitalExpression
@@ -423,7 +432,7 @@ samtools view output_dropseq/starAligned.merged.exons.bam | grep "GE:" | head
 Finally we count how many unique UMIs are associated with each gene and cell barcode. In the `DigitalExpression` command we indicate the names of the tags we used for cell barcodes, UMIs and exons. We also indicate how many barcodes/cells we wish to report in the UMI matrix. Because this command will generate a standard *csv* file (as opposed to a sparse matrix format), it is important not ask for a very large number of barcodes. In this case, we will use our upper-limit estimation of 10,000 cells from step 2.4.
 
 ```
-DigitalExpression I=output_dropseq/starAligned.merged.exons.bam O=output_dropseq/lung1_sample.dge.txt.gz SUMMARY=output_dropseq/lung1_sample.dge.summary.txt CELL_BARCODE_TAG=XC MOLECULAR_BARCODE_TAG=XM GENE_EXON_TAG=GE NUM_CORE_BARCODES=10000
+DigitalExpression I=output_dropseq/Aligned.merged.exons.bam O=output_dropseq/lung1_sample.dge.txt.gz SUMMARY=output_dropseq/lung1_sample.dge.summary.txt CELL_BARCODE_TAG=XC MOLECULAR_BARCODE_TAG=XM GENE_EXON_TAG=GE NUM_CORE_BARCODES=10000
 ```
 
 This command will generate an UMI count matrix (in standard tabular format). Because this matrix file can be quite big, it is compressed with `gzip`.
