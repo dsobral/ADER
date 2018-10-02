@@ -5,11 +5,14 @@
 These techniques allow among others, understanding of cell-to-cell heterogeneity, tracing of differentiation pathways, modelling transcriptional dynamics. For an overview of scRNA-seq applications see
 [Liu, F1000Research (2016)](https://f1000research.com/articles/5-182/v1), [Griffiths *et al.*, molecular systems biology (2018)](https://onlinelibrary.wiley.com/doi/full/10.15252/msb.20178046).
 
-scRNA-seq always starts with the collection of individual cells
+scRNA-seq starts with the collection of individual cells. Many techniques exist for this purpose, both classical, such as FACS and micromanipulation, and modern, such as microfluidics and droplet based systems. All these differ in their flexibility (ability to isolate cells based on ) and throughput (number of cells able to be isolated and processed).
 
 ![](images/singlecell_collection.png)
+[Valihrach *et al.*, Int J Mol Sci. (2018)](https://www.ncbi.nlm.nih.gov/pubmed/29534489)
 
-## Chromium System (10x Genomics)
+In all cases, after isolation of the cells, RNA from each cell is reverse-transcribed into cDNA, barcoded with a cell-specific oligo, and then sequenced by high-thoughput sequencing. The origin of each sequenced RNA fragment can be recovered by reading the cell-specific barcode.
+
+### Example platform: Chromium System (10x Genomics)
 
 The Chromium System for scRNA-seq, is a droplet based high-throughput system capable of analyzing 100 to 100,000 cells in a single experiment.
 
@@ -24,7 +27,7 @@ Sequencing is done in paired end-mode and, unlike in bulk RNA-seq, the number of
 ![Overview of single-cell workflow](images/Chromium10x.png)
 [Chromium Single Cell Gene Expression Solution](https://www.10xgenomics.com/solutions/single-cell/)
 
-## Single Cell Data Analysis
+### Single Cell Data Analysis
 
 scRNA-seq data analysis presents a number of challenges, many of which are still the focus of active research, such as:
 
@@ -33,7 +36,7 @@ scRNA-seq data analysis presents a number of challenges, many of which are still
 - High amount of zeros (also called *dropouts*);
 - High variability.
 
-Conceptually, the analysis of a scRNA-seq sample for the purpose of identifying and characterizing cell subpopulations, starts with preprocessing of raw reads, then reads are mapped to a reference genome and quantified in an *UMI count matrix*. Downstream analyses of this count matrix allow the identification and characterization of subpopulations of cells.
+The analysis of a scRNA-seq sample, for the purpose of identifying and characterizing cell subpopulations, starts with preprocessing of raw reads, then reads are mapped to a reference genome and quantified in an *UMI count matrix*. Downstream analyses of this count matrix allow the identification and characterization of subpopulations of cells.
 
 ![Single Cell Transcriptomics Analysis Workflow](images/single-cell-analysis-workflow.jpg)
 [Poirion *et al.* Frontiers in Genetics (2016)](https://www.frontiersin.org/articles/10.3389/fgene.2016.00163/full)
@@ -52,9 +55,7 @@ In order to contruct a *UMI* count matrix, reads mapping to each gene are counte
 
 #### 3. Quality check and filtering (*feature selection*)
 
-Many GEMs...
-
-Low quality cells and outliers are removed from the *UMI* count matrix. These include dead cells, or empty GEMs that contain only ambient RNA.
+Low quality cells and outliers are removed from the *UMI* count matrix. These include dead cells, empty GEMs that contain only ambient RNA, or GEMs that carry more than single-cell (multiplets).
 
 #### 4. Normalization
 
@@ -93,7 +94,7 @@ In this tutorial, we will go through the basic steps of a *single sample* single
    - Cluster cell subpopulations.
    - Perform differential gene expression to determine subpopulation marker genes.
 
-### LOXX: Use `cellranger` to obtain an UMI count matrix from a set of FastQ files
+### LO 9.2: Understand the output of the *cellranger* pipeline
 
 For this task we will use an example dataset available from the 10x Genomics website.
 
@@ -148,8 +149,6 @@ Run `cellranger count` specifying the output folder id (--id), the transcriptome
 ```
 cellranger count --id=output_cellranger --transcriptome=reference/GRCh38_1 --fastqs=fastqs/pbmc4k_sample --sample=pbmc4k_sample --jobmode=local --localcores=8 --localmem=12 --expect-cells=4000
 ```
-
-### LOXXX: Understand the output of the `cellranger count` command
 
 Running the above commands will produce the following files in the `output_cellranger/outs` directory:
 
@@ -232,7 +231,7 @@ This command will display the first 6 lines from the UMI matrix file. The values
 32,738 x 737,280 - 164,246 = 24,136,908,394 zeros (or 99.9993195% of the matrix!)
 </p></details><br/>
 
-## LO XX: Use Drop-seq tools to obtain an UMI count matrix
+## LO 9.3: Use *Drop-seq tools* to obtain an UMI count matrix
 
 While `cellranger count` is a self-contained pipeline that automates all the steps necessary to obtain the *UMI* count matrix, it was designed to work with datasets obtained exclusively from the Chromium platform. To work with datasets obtained with other single-cell methods greater flexibility is needed. For this a number of alternative pipelines are available that allow greater flexibility in the analysis, such as [Drop-seq tools](http://mccarrolllab.com/dropseq/) and [UMI tools](https://github.com/CGATOxford/UMI-tools).
 
