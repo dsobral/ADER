@@ -199,6 +199,10 @@ transformed.rlog <- rlog(ddsHTSeq, blind=TRUE)
 plotPCA(transformed.rlog)
 ```
 
+</details>
+
+---
+
 ## Sample-to-sample correlation heatmap
 
 Another common visualization of high-throughput datasets is a clustered heatmap of sample-to-sample distances (or correlations). This visualization groups togheter the samples that are more similar to each other. 

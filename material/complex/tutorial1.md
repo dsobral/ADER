@@ -248,7 +248,7 @@ write.csv(as.data.frame(orderedRes), file="trapnell_normCounts.DESeq2.csv")
 
 # Visualizing results
 
-*DESeq2* provides several functions to visualize the results, while additional plots can be made using the extensive R graphics cappabilities. Visualization can help to better understand the results, and catch potential problems in the data and analysis. We start here by reproducing the plots that we previously obtained using Galaxy.
+*DESeq2* provides several functions to visualize the results, while additional plots can be made using the extensive R graphics capabilities. Visualization can help to better understand the results, and catch potential problems in the data and analysis. We start here by reproducing the plots that we previously obtained using Galaxy.
 
 ## Dispersion plot
 
@@ -381,6 +381,10 @@ plotPCA(transformed.rlog)
 
 ![](tutorial1_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
 
+</details>
+
+---
+
 ## Sample-to-sample correlation heatmap
 
 Another common visualization of high-throughput datasets is a clustered heatmap of sample-to-sample distances (or correlations). This visualization groups togheter the samples that are more similar to each other. 
@@ -416,7 +420,6 @@ dists
 ```
 
 ```r
-# headmap of distances
 heatmap(as.matrix(dists), main="Clustering of euclidean distances", scale="none")
 ```
 
