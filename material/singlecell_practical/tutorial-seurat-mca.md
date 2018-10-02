@@ -1,7 +1,7 @@
 ---
 title: "ADER18S - Analysis of Mouse Cell Atlas scRNA-seq using Seurat"
 author: "Daniel Neves"
-date: '25 Setembro, 2018'
+date: '02 Outubro, 2018'
 output: 
   html_document:
     keep_md: yes
@@ -33,7 +33,7 @@ library(reshape2)
 
 # Loading and filtering the raw UMI count matrix
 
-First we load the raw UMI matrix into the R environment. 
+First we load the raw UMI matrix into the R environment. This should take approximately 30 seconds.
 
 
 ```r
@@ -50,7 +50,7 @@ dim(mat.raw)
 
 **Question**: How many genes and barcodes are quantified in this raw UMI matrix? 
 
-<details><summary><b>Click Here to see the answer</b></summary> 16815 genes and 10000 barcodes. </details>
+<details><summary><b>Click Here to see the answer</b></summary> 16566 genes and 10000 barcodes. </details>
 
 ---
 
@@ -71,7 +71,7 @@ plot(x, log="xy",type="l", xlab="Barcodes", ylab="UMI counts")
 
 There appears to be a drop in the total number of UMI counts after the first 1,000 barcodes. However, unlike what we saw in the 10x dataset, the separation between an empty GEM and a GEM containing a cell is less clear. This could be due to the presence of ambient RNA in the sample. 
 
-In the original study the authors decided on a threshold of 500 UMI counts to select barcodes for further analysis. Thus we are left with 2709 cells for further analysis.
+In the original study the authors decided on a threshold of 500 UMI counts to select barcodes for further analysis. Thus we are left with 2684 cells for further analysis.
 
 
 ```r
@@ -305,7 +305,7 @@ sobj <- ScaleData(object = sobj, vars.to.regress = c("nUMI", "percent.mito"))
 
 ```
 ## 
-## Time Elapsed:  15.6823744773865 secs
+## Time Elapsed:  15.4347565174103 secs
 ```
 
 ```
@@ -421,13 +421,32 @@ TSNEPlot(sobj, do.label = TRUE)
 
 
 ```r
-for (i in c(5, 10, 20, 50)) {
-  tmp <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=10)
-  TSNEPlot(tmp, do.label = TRUE)
-}
+tmp <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=5)
+TSNEPlot(tmp, do.label = TRUE)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-1.png)<!-- -->![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-2.png)<!-- -->![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-3.png)<!-- -->![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-4.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
+
+```r
+tmp <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=10)
+TSNEPlot(tmp, do.label = TRUE)
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-2.png)<!-- -->
+
+```r
+tmp <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=20)
+TSNEPlot(tmp, do.label = TRUE)
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-3.png)<!-- -->
+
+```r
+tmp <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=50)
+TSNEPlot(tmp, do.label = TRUE)
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-15-4.png)<!-- -->
 
 </details>
 
@@ -524,6 +543,8 @@ Some of the clusters appear to be very similar to each other. In particular, clu
 <details><summary>Click Here to see the answer</summary>
 It is clear from the expression heatmap that clusters 0, 1, 2 and possibly 13 represent the same population of cells. Clusters 8 and 9 also appear to be very similar, although they are clearly separated on the t-SNE. 
 </details>
+
+---
 
 We can check for differences between two specific clusters. Below we check if there any genes that distiguish clusters 0 and 1. It appears that these clusters are distiguished only by a small difference in the expression of 5 mitochondrion encoded genes. 
 
@@ -639,6 +660,8 @@ It appears that most differences between clusters 0, 2, 3 and 4 are due to small
 
 </details>
 
+---
+
 We will merge clusters 0, 2, 3 and 4 into a single cluster (that we name 16). But first, we save the old cluster ids so we can restore them later if need arises.
 
 
@@ -686,8 +709,7 @@ Now that we have a clear set of 15 clusters and marker genes associated with eac
 
 **Question**: What methods would you use to identify which cell populations are being identified?
 
-
-
+Some cells have well known markers. For example, the gene Ms4a1 is a marker for B-cells, while Il7r and Cd8a are expressed in T-cells. By inspecting the expression of these genes, B-cell and T-cell clusters can be easily identified.
 
 
 ```r
@@ -703,7 +725,6 @@ VlnPlot(sobj, features.plot = c("Il7r", "Cd8a", "Ms4a1"), point.size.use=0.5)
 
 ![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
 
-
 Tomorrow, we will see how functional analysis can also help in this process.
 
 For now, we will import the annotated cell assignments from the study and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the cell assignments from the paper. 
@@ -717,13 +738,6 @@ sobj@meta.data$Cell.name <- paste0("Lung_1.", rownames(sobj@meta.data))
 sobj@meta.data$Annotation <- annotation$Annotation[ match(sobj@meta.data$Cell.name, annotation$Cell.name) ]
 sobj@meta.data$Annotation <- gsub("\\(Lung\\)", "", sobj@meta.data$Annotation)
 
-sobj@meta.data$AnnotationSimple <- gsub("_.*", "", sobj@meta.data$Annotation)
-```
-
-
-
-
-```r
 TSNEPlot(sobj, group.by="Annotation", do.label=TRUE, do.return=TRUE) + theme(legend.position = "none") 
 ```
 
@@ -731,9 +745,27 @@ TSNEPlot(sobj, group.by="Annotation", do.label=TRUE, do.return=TRUE) + theme(leg
 ## Warning: Removed 1 rows containing missing values (geom_text).
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-32-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-31-1.png)<!-- -->
+
+We can compare our clustering result with the annotated cells by tabulating cluster cell assignments. 
+
 
 ```r
+cluster.comparison <- table(sobj@ident, sobj@meta.data$Annotation)
+mdf <- melt(cluster.comparison, varnames = c("Cluster", "Annotation"), value.name = "Cells")
+
+ggplot(mdf, aes(x=factor(Cluster), y=Annotation)) + 
+  geom_text(aes(label=Cells, alpha=Cells>0))
+```
+
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-32-1.png)<!-- -->
+
+Some of the clusters defined in the study are sub-populations of the same type of cells, differing only in the expression of a few genes. Below, we simplify these cluster assignments.
+
+
+```r
+sobj@meta.data$AnnotationSimple <- gsub("_.*", "", sobj@meta.data$Annotation)
+
 TSNEPlot(sobj, group.by="AnnotationSimple", do.label=TRUE, do.return=TRUE) + theme(legend.position = "none") 
 ```
 
@@ -741,7 +773,7 @@ TSNEPlot(sobj, group.by="AnnotationSimple", do.label=TRUE, do.return=TRUE) + the
 ## Warning: Removed 1 rows containing missing values (geom_text).
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-32-2.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-33-1.png)<!-- -->
 
 We can compare our clustering result with the annotated cells by tabulating cluster cell assignments. 
 
@@ -754,7 +786,7 @@ ggplot(mdf, aes(x=factor(Cluster), y=Annotation)) +
   geom_text(aes(label=Cells, alpha=Cells>0))
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-33-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-34-1.png)<!-- -->
 
 We can also reproduce figure 4D.
 
@@ -764,7 +796,7 @@ genes <- c("Sftpc", "Vwf", "Dcn", "Cxcl14")
 FeaturePlot(sobj, features.plot = genes, cols.use=c("grey", "red"), no.legend = FALSE)
 ```
 
-![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-34-1.png)<!-- -->
+![](tutorial-seurat-mca_files/figure-html/unnamed-chunk-35-1.png)<!-- -->
 
 # Session Information
 
