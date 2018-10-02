@@ -7,6 +7,8 @@ output:
     keep_md: yes
 ---
 
+
+
 This document demonstrates how to use *DESeq2* in the *R environment* to perform a differential expression analysis using the the Trapnell datasets as an example. We will first need to tell R what samples are going to be analysed, then run the *DESeq2* pipeline and plot the results of the analysis.
 
 # Setting up the environment
@@ -259,7 +261,7 @@ We can plot the *DESeq2* dispersion re-estimation procedure by typing:
 plotDispEsts(ddsHTSeq)
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
 
 ## P-value distribution
 
@@ -270,7 +272,7 @@ As a sanity check, we can inspect the distribution of p-values using the `hist` 
 hist(resHTSeq$pvalue, breaks=0:50/50, xlab="p value", main="Histogram of nominal p values")
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
 
 ## MA-plot
 
@@ -281,7 +283,7 @@ To make an (unshrunken) **MA-plot**, that displays the relationship between a ge
 plotMA(resHTSeq)
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
 
 To obtain an **MA-plot** with shrunken log2 fold-changes we use the `lfcShrink` function. This function is equivalent to the `results` function that we called previously, but will return a table with the *log2FoldChange* and *lfcSE* columns replaced with the shrunken values. The `coef` argument is used to specify what *contrast* we are interested in analysing (in this case condition_C2_vs_C1), so we first call `resultsNames` to determine the right coefficient.
 
@@ -299,7 +301,7 @@ resHTSeqShrunk <- lfcShrink(ddsHTSeq, coef=2)
 plotMA(resHTSeqShrunk)
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 ## Volcano plot
 
@@ -314,7 +316,7 @@ points(resHTSeq$log2FoldChange[ highlight ], -log10(resHTSeq$pvalue[ highlight ]
 abline(v=0, h=-log10(0.05), lty="dashed", col="grey")
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
 
 **Exercise**: Change the commands above to make a **volcano plot** using the shrunken log fold changes instead. Also change the threshold of differential expression to 0.01 and the color of the differentially expressed genes to green.
 
@@ -329,7 +331,7 @@ points(resHTSeqShrunk$log2FoldChange[ highlight ], -log10(resHTSeqShrunk$pvalue[
 abline(v=0, h=-log10(0.01), lty="dashed", col="grey")
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
 </details>
 
@@ -337,7 +339,7 @@ abline(v=0, h=-log10(0.01), lty="dashed", col="grey")
 
 ## Principal component analysis (PCA)
 
-*DESeq2* provides a function to make a Principal Component Analysis (PCA) of the count data. The *DESeq2* [vignette](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-data-transformations) recommend using transformed counts as input to the PCA routines, as these transformations remove the dependence of the sample-to-sample variance on the genes' mean expression. 
+*DESeq2* provides a function to make a Principal Component Analysis (PCA) of the count data. The *DESeq2* [vignette](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-data-transformations) recommends using transformed counts as input to the PCA routines, as these transformations remove the dependence of the sample-to-sample variance on the genes' mean expression. 
 
 One such transformations is the variance stabilizing transformation (VST). You can type `?varianceStabilizingTransformation` to learn more about this. To compare samples in an manner unbiased by prior information (i.e. the experimental condition), the `blind` argument is set to TRUE.
 
@@ -356,74 +358,33 @@ transformed.vsd <- varianceStabilizingTransformation(ddsHTSeq, blind=TRUE)
 plotPCA(transformed.vsd)
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
-
-Another type of transformation implemented in *DESeq2* is the 'regularized log' transformation. Type `?rlog` to learn more about this transformation.
-
-**Exercise**: Change the commands above to make a PCA of the *rlog* transformed count data. Compare the two PCA plots.
-
-<details><summary><b>Click Here to see the answer</b></summary>
-
-
-```r
-transformed.rlog <- rlog(ddsHTSeq, blind=TRUE)
-```
-
-```
-## -- note: fitType='parametric', but the dispersion trend was not well captured by the
-##    function: y = a/x + b, and a local regression fit was automatically substituted.
-##    specify fitType='local' or 'mean' to avoid this message next time.
-```
-
-```r
-plotPCA(transformed.rlog)
-```
-
 ![](tutorial1_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
-
-</details>
-
----
 
 ## Sample-to-sample correlation heatmap
 
 Another common visualization of high-throughput datasets is a clustered heatmap of sample-to-sample distances (or correlations). This visualization groups togheter the samples that are more similar to each other. 
 
-To make this visualization we first calculate a matrix of euclidean distances between all pairs of samples. Then we use the `heatmap` (from the base R package) to cluster and display the heatmap.
+To make this visualization we first calculate a matrix of distances between all pairs of samples. Then we use the `heatmap` (from the base R package) to cluster and display the heatmap. 
 
 
 ```r
-dists <- dist(t(assay(transformed.vsd)))
-
-dists
-```
-
-```
-##                       trapnell_counts_C1_R1 trapnell_counts_C1_R2
-## trapnell_counts_C1_R2              7.862429                      
-## trapnell_counts_C1_R3              7.915221              7.874660
-## trapnell_counts_C2_R1             13.022199             13.002860
-## trapnell_counts_C2_R2             13.106311             13.164779
-## trapnell_counts_C2_R3             13.127508             13.151475
-##                       trapnell_counts_C1_R3 trapnell_counts_C2_R1
-## trapnell_counts_C1_R2                                            
-## trapnell_counts_C1_R3                                            
-## trapnell_counts_C2_R1             13.048791                      
-## trapnell_counts_C2_R2             13.169796              7.979512
-## trapnell_counts_C2_R3             13.163281              8.042494
-##                       trapnell_counts_C2_R2
-## trapnell_counts_C1_R2                      
-## trapnell_counts_C1_R3                      
-## trapnell_counts_C2_R1                      
-## trapnell_counts_C2_R2                      
-## trapnell_counts_C2_R3              7.980754
-```
-
-```r
-heatmap(as.matrix(dists), main="Clustering of euclidean distances", scale="none")
+dists <- as.matrix(dist(t(normCounts)))
+heatmap(dists, main="Clustering of sample-to-sample distances", scale="none")
 ```
 
 ![](tutorial1_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
+
+We can also use pearson (or spearman) correlations as a distance metric. This is more robust than simple euclidean distances, and has the advantage that we can even use the raw (non-normalized) counts as input. It is generally a good idea to log transform the counts first.
+
+
+```r
+log10_rawCounts <- log10(counts(ddsHTSeq) + 1)
+  
+dists <- 1 - cor(log10_rawCounts, method="pearson")
+heatmap(dists, main="Clustering of sample-to-sample pearson correlations", scale="none")
+```
+
+![](tutorial1_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
 
 # Other visualizations
 
@@ -468,7 +429,7 @@ heatmap.2(diffcounts,
           distfun = function(x) as.dist(1 - cor(t(x))))
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
 
 The following commands are used to plot a heatmap of the 20 most differentially expressed genes. For this, we use the ordered results table to determine which genes are most differentially expressed, and then plot the values from the normalized counts table (transformed to log10).
 
@@ -498,6 +459,6 @@ pheatmap(values,
          width=6)
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
 
 

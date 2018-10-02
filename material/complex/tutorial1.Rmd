@@ -7,6 +7,10 @@ output:
     keep_md: yes
 ---
 
+```{r, eval=FALSE, echo=FALSE}
+knitr::purl("tutorial1.Rmd")
+```
+
 This document demonstrates how to use *DESeq2* in the *R environment* to perform a differential expression analysis using the the Trapnell datasets as an example. We will first need to tell R what samples are going to be analysed, then run the *DESeq2* pipeline and plot the results of the analysis.
 
 # Setting up the environment
@@ -177,7 +181,7 @@ abline(v=0, h=-log10(0.01), lty="dashed", col="grey")
 
 ## Principal component analysis (PCA)
 
-*DESeq2* provides a function to make a Principal Component Analysis (PCA) of the count data. The *DESeq2* [vignette](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-data-transformations) recommend using transformed counts as input to the PCA routines, as these transformations remove the dependence of the sample-to-sample variance on the genes' mean expression. 
+*DESeq2* provides a function to make a Principal Component Analysis (PCA) of the count data. The *DESeq2* [vignette](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-data-transformations) recommends using transformed counts as input to the PCA routines, as these transformations remove the dependence of the sample-to-sample variance on the genes' mean expression. 
 
 One such transformations is the variance stabilizing transformation (VST). You can type `?varianceStabilizingTransformation` to learn more about this. To compare samples in an manner unbiased by prior information (i.e. the experimental condition), the `blind` argument is set to TRUE.
 
@@ -187,34 +191,24 @@ transformed.vsd <- varianceStabilizingTransformation(ddsHTSeq, blind=TRUE)
 plotPCA(transformed.vsd)
 ```
 
-Another type of transformation implemented in *DESeq2* is the 'regularized log' transformation. Type `?rlog` to learn more about this transformation.
-
-**Exercise**: Change the commands above to make a PCA of the *rlog* transformed count data. Compare the two PCA plots.
-
-<details><summary><b>Click Here to see the answer</b></summary>
-
-```{r}
-transformed.rlog <- rlog(ddsHTSeq, blind=TRUE)
-
-plotPCA(transformed.rlog)
-```
-
-</details>
-
----
-
 ## Sample-to-sample correlation heatmap
 
 Another common visualization of high-throughput datasets is a clustered heatmap of sample-to-sample distances (or correlations). This visualization groups togheter the samples that are more similar to each other. 
 
-To make this visualization we first calculate a matrix of euclidean distances between all pairs of samples. Then we use the `heatmap` (from the base R package) to cluster and display the heatmap.
+To make this visualization we first calculate a matrix of distances between all pairs of samples. Then we use the `heatmap` (from the base R package) to cluster and display the heatmap. 
 
 ```{r}
-dists <- dist(t(assay(transformed.vsd)))
+dists <- as.matrix(dist(t(normCounts)))
+heatmap(dists, main="Clustering of sample-to-sample distances", scale="none")
+```
 
-dists
+We can also use pearson (or spearman) correlations as a distance metric. This is more robust than simple euclidean distances, and has the advantage that we can even use the raw (non-normalized) counts as input. It is generally a good idea to log transform the counts first.
 
-heatmap(as.matrix(dists), main="Clustering of euclidean distances", scale="none")
+```{r}
+log10_rawCounts <- log10(counts(ddsHTSeq) + 1)
+  
+dists <- 1 - cor(log10_rawCounts, method="pearson")
+heatmap(dists, main="Clustering of sample-to-sample pearson correlations", scale="none")
 ```
 
 # Other visualizations
