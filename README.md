@@ -169,57 +169,57 @@ For this, we are providing small example datasets and exercises that participant
 ### Monday, October 8th
 
 + 09:30 - 10:00 Introduction to the course and self presentation of the participants
-+ 10:00 - 11:00 [The High Throughput Sequencing Workflow. Designing your experiment for Differential Expression using RNA-Seq](material/Practical.md#LO1). [Steps in the analysis of RNA-Seq differential expression experiments](material/Practical.md#LO2).
++ 10:00 - 11:00 [The High Throughput Sequencing Workflow. Designing your experiment for Differential Expression using RNA-Seq](material/L01_L02.md#LO1). [Steps in the analysis of RNA-Seq differential expression experiments](material/L01_L02.md#LO2).
 + 11:00 - 11:30 ***Coffee Break***
-+ 11:30 - 12:30 [Interpret what are fastq files and what is their content](material/Practical.md#LO3.1). [Use software like FastQC to process fastq files and produce quality reports (QC)](material/Practical.md#LO3.2). 
++ 11:30 - 12:30 [Interpret what are fastq files and what is their content](material/L03.md#LO3.1). [Use software like FastQC to process fastq files and produce quality reports (QC)](material/L03.md#LO3.2). 
 + 12:30 - 14:00 ***LUNCH BREAK***
-+ 14:00 - 16:00 [Remove low quality bases](material/Practical.md#LO4.1), [Remove adaptors and other artefactual sequences from your reads](material/Practical.md#LO4.2).
++ 14:00 - 16:00 [Remove low quality bases](material/L04.md#LO4.1), [Remove adaptors and other artefactual sequences from your reads](material/L04.md#LO4.2).
 + 16:00 - 16:30 ***Tea Break***
-+ 16:30 - 18:00 [What is a reference genome, versioning and where to obtain genomes](material/Practical.md#LO5.1). [Alignment software: hisat2; bwa; salmon](material/Practical.md#LO5.2). [Run an alignment: the SAM/BAM alignment format](material/Practical.md#LO5.3).
++ 16:30 - 18:00 [What is a reference genome, versioning and where to obtain genomes](material/L05.md#LO5.1). [Alignment software: hisat2; bwa; salmon](material/L05.md#LO5.2). [Run an alignment: the SAM/BAM alignment format](material/L05.md#LO5.3).
 
 ### Tuesday, October 9th
 
 + 09:30 - 10:00 Morning Wrap-up (what have we done so far?)
-+ 10:00 - 11:00 [What is a reference gene annotation, versioning and where to obtain](material/Practical.md#LO6.1). [Visualizing alignments in IGV for single genes](material/Practical.md#LO6.2).
++ 10:00 - 11:00 [What is a reference gene annotation, versioning and where to obtain](material/L06.md#LO6.1). [Visualizing alignments in IGV for single genes](material/L06.md#LO6.2).
 + 11:00 - 11:30 ***Coffee Break***
-+ 11:30 - 12:30 [Use Qualimap to assess quality of alignments](material/Practical.md#LO6.3).
++ 11:30 - 12:30 [Use Qualimap to assess quality of alignments](material/L06.md#LO6.3).
 + 12:30 - 14:00 ***LUNCH BREAK***
-+ 14:00 - 16:00 [The process of generating gene counts from genome aligments](material/Practical.md#LO7.1). [Use featurecounts to generate tables of gene counts](material/Practical.md#LO7.2). [Use Salmon to generate counts using only the transcriptome](material/Practical.md#LO7.3).
++ 14:00 - 16:00 [The process of generating gene counts from genome aligments](material/L07.md#LO7.1). [Use featurecounts to generate tables of gene counts](material/L07.md#LO7.2). [Use Salmon to generate counts using only the transcriptome](material/L07.md#LO7.3).
 + 16:00 - 16:30 ***Tea Break***
-+ 16:30 - 18:00 [Execute a pairwise differential expression analysis](material/Practical.md#LO8.1)
++ 16:30 - 18:00 [Execute a pairwise differential expression analysis](material/L08.md#LO8.1)
 
 
 ### Wednesday, October 10th
 
 + 09:30 - 10:00 Morning Wrap-up (what have we done so far?)
-+ 10:00 - 11:00 [Interpretation and visualization of results](material/Practical.md#LO8.2). 
++ 10:00 - 11:00 [Interpretation and visualization of results](material/L08.md#LO8.2). 
 + 11:00 - 11:30 ***Coffee Break***
-+ 11:30 - 12:30 [Interpretation and visualization of results](material/Practical.md#LO8.2).
++ 11:30 - 12:30 [Interpretation and visualization of results](material/L08.md#LO8.2).
 + 12:30 - 14:00 ***LUNCH BREAK***
-+ 14:00 - 16:00 [More complex settings: batch effects and paired samples](material/Practical.md#LO8.3).
++ 14:00 - 16:00 [More complex settings: batch effects and paired samples](material/L08.md#LO8.3).
 + 16:00 - 16:30 ***Tea Break***
-+ 16:30 - 18:00 [Gain control over your analysis using R and Rstudio](material/Practical.md#LO8.4).
++ 16:30 - 18:00 [Gain control over your analysis using R and Rstudio](material/L08.md#LO8.4).
 
 
 ### Thursday, October 11th
 
 + 09:30 - 10:00 Morning wrap-up (what have we done so far?)
-+ 10:00 - 11:00 [Specificities of single-cell RNAseq, using the Chromium system as example](material/Practical.md#LO9.1).
++ 10:00 - 11:00 [Specificities of single-cell RNAseq, using the Chromium system as example](material/L09.md#LO9.1).
 + 11:00 - 11:30 ***Coffee Break***
-+ 11:30 - 12:30 [Generate a count matrix for a single-cell RNAseq dataset](material/Practical.md#LO9.1).
++ 11:30 - 12:30 [Generate a count matrix for a single-cell RNAseq dataset](material/L09.md#LO9.1).
 + 12:30 - 14:00 ***LUNCH BREAK***
-+ 14:00 - 16:00 [Generate groups of cells by clustering gene expression](material/Practical.md#LO9.2).
++ 14:00 - 16:00 [Generate groups of cells by clustering gene expression](material/L09.md#LO9.2).
 + 16:00 - 16:30 ***Tea Break***
-+ 16:30 - 18:00 [Obtain marker genes for the different groups of cells](material/Practical.md#LO9.3).
++ 16:30 - 18:00 [Obtain marker genes for the different groups of cells](material/L09.md#LO9.3).
 
 ### Friday, October 11th
 
 + 09:30 - 10:00 Morning wrap-up (what have we done so far?)
-+ 10:00 - 11:00 [How to extract meaning from a list of genes](material/Practical.md#LO10.1).
++ 10:00 - 11:00 [How to extract meaning from a list of genes](material/L10.md#LO10.1).
 + 11:00 - 11:30 ***Coffee Break***
-+ 11:30 - 12:30 [Understand the concept of functional enrichment analysis, and the statistics involved](material/Practical.md#LO10.2).
++ 11:30 - 12:30 [Understand the concept of functional enrichment analysis, and the statistics involved](material/L10.md#LO10.2).
 + 12:30 - 14:00 ***LUNCH BREAK***
-+ 14:00 - 16:00 [Interpret the results of functional enrichment analysis](material/Practical.md#LO10.3).
++ 14:00 - 16:00 [Interpret the results of functional enrichment analysis](material/L10.md#LO10.3).
 + 16:00 - 16:30 ***Tea Break***
 + 16:30 - 18:00 Final wrap-up Session.
 
