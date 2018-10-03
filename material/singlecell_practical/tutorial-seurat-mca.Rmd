@@ -65,7 +65,7 @@ plot(x, log="xy",type="l", xlab="Barcodes", ylab="UMI counts")
 
 There appears to be a drop in the total number of UMI counts after the first 1,000 barcodes. However, unlike what we saw in the 10x dataset, the separation between an empty GEM and a GEM containing a cell is less clear. This could be due to the presence of ambient RNA in the sample. 
 
-In the original study the authors decided on a threshold of 500 UMI counts to select barcodes for further analysis. Thus we are left with 2684 cells for further analysis.
+In the original study, taking into account the full set of 91 samples, the authors selected a threshold of 500 UMI counts to select barcodes for further analysis. Thus we are left with 2684 cells for further analysis.
 
 ```{r}
 plot(x, log="xy",type="l", xlab="Barcodes", ylab="UMI counts")
@@ -99,7 +99,7 @@ dim(sobj@data)
 Next we inspect the distributions of total counts per cell, and number of genes detected per cell. As expected, the higher the number of total counts in a cell, the higher the number of genes that we are able to detect.
 
 ```{r}
-VlnPlot(sobj, features.plot = c("nUMI", "nGene"))
+VlnPlot(sobj, features.plot = c("nUMI", "nGene"), point.size.use = 0.2)
 plot(sobj@meta.data$nUMI, sobj@meta.data$nGene, pch=20, cex=0.5)
 ```
 
@@ -113,7 +113,7 @@ This suggest that if the sample was sequenced deeper, we would be able to detect
 
 ---
 
-Next we calculate the percentage of mitochondrial RNA in each cell and add this information as cell metadata. We then plot the distibutions of total UMI counts, number of detected genes and percent of mitochondrial RNA for all cells.
+Next we calculate the percentage of mitochondrial RNA in each cell and add this information as cell metadata. In *Mus musculus*, genes encoded in the mitochondria have names that start with "mt-" (e.g. mt-Atp6, mt-Nd1, ...). We then plot the distibutions of total UMI counts, number of detected genes and percent of mitochondrial RNA for all cells.
 
 ```{r}
 mito.genes <- grep("^mt-", rownames(sobj@data), value = TRUE)
@@ -167,7 +167,7 @@ sobj@data[1:10, 1:10]
 
 Housekeeping genes that are similarly expressed in all cell populations are not useful for the purpose of identifying these populations. Thus, it is often useful to select a subset of genes that display higher than average variability among cells to be used for dimensionality reduction and clustering of cells, as this will greatly speed-up the computations. 
 
-The `FindVariableGenes` from the *Seurat* package does this by selecting genes that display a variance/mean ratio above a user-supplied threshold. Here we select genes that have a dispersion more than 0.5 standard deviations above the average dispersion of genes with a similar expression level (`y.cuttoff`). We can also set thresholds for minimum expression (`x.low.cutoff`) and maximum expression (`x.high.cutoff`).
+The `FindVariableGenes` from the *Seurat* package does this by selecting genes that display a variance/mean ratio above a user-supplied threshold. Here we select genes that have a dispersion more than 0.5 standard deviations above the average dispersion of genes with a similar expression level (`y.cuttoff`). We can also set thresholds for minimum expression (`x.low.cutoff`) and maximum expression (`x.high.cutoff`).  
 
 ```{r vargenes}
 sobj <- FindVariableGenes(sobj, mean.function = ExpMean, dispersion.function = LogVMR,  
@@ -183,8 +183,8 @@ hvginfo <- sobj@hvg.info[ sobj@var.genes, ]
 highest.dispersion <- head(rownames(hvginfo)[ order(-hvginfo$gene.dispersion) ])
 highest.mean <- head(rownames(hvginfo)[ order(-hvginfo$gene.mean) ])
 
-VlnPlot(sobj, features.plot = highest.dispersion, point.size.use=0.5)
-VlnPlot(sobj, features.plot = highest.mean, point.size.use=0.5)
+VlnPlot(sobj, features.plot = highest.dispersion, point.size.use=0.2)
+VlnPlot(sobj, features.plot = highest.mean, point.size.use=0.2)
 ```
 
 # Dimensional reduction
@@ -221,13 +221,6 @@ props <- eigs / sum(eigs)
 plot(props, ylab="Proportion of variance", xlab="Principal Component")
 ```
 
-We can also vizualize top genes associated with each PCA (i.e. which are the genes that are driving the heterogeneity of the data). The `VizPCA` function plots the scores of the most extreme genes for each PC. The `PCHeatmap` shows a heatmap of the expression of these genes across cells.
-
-```{r, fig.width=8, fig.height=12}
-VizPCA(sobj, pcs.use = 1:15, do.balanced = TRUE)
-PCHeatmap(sobj, pc.use = 1:15, cells.use = 500, do.balanced = TRUE, label.columns = FALSE)
-```
-
 **Question**: Based on the above plots, how many principal components would you consider for further analysis.
 
 <details><summary><b>Click Here to see the answer</b></summary>
@@ -240,14 +233,18 @@ There is a drop in the percentage of variance explained after PC15 and the plot 
 
 # Clustering
 
-Because of the high dimensionality of scRNA-seq datasets, clustering algorithms face a number of challenges, such as high computation times and memory requirements. To alieviate these problems, one solution is to perform the clustering using the cells PCA scores instead of the full expression matrix. Here each principal component represents a ...
+Because of the high dimensionality of scRNA-seq datasets, clustering algorithms face a number of challenges, such as high computation times and memory requirements. To alieviate these problems, one solution is to perform the clustering using the cells PCA scores instead of the full expression matrix, where each principal component represents the signal of a correlated set of genes. Based on the analysis above, we are going to proceed using 20 PCs.
 
-`Seurat` uses a graph based clustering algorithm. The `resolution` parameter influences the granularity of the clusters, with higher values producing more and smaller clusters.
+`Seurat` uses a graph based clustering algorithm. The `resolution` parameter influences the granularity of the clusters, with higher values producing more and smaller clusters. 
 
-```{r clusters, fig.width=8, fig.height=4}
-sobj <- FindClusters(sobj, reduction.type = "pca", dims.use = 1:15, 
+```{r clusters}
+sobj <- FindClusters(sobj, reduction.type = "pca", dims.use = 1:20, 
     resolution = 1.2, print.output = 0, save.SNN = FALSE)
+```
 
+The PCA plot will now display the identified clusters. 
+
+```{r, fig.width=8, fig.height=4}
 p1 <- PCAPlot(sobj, dim.1 = 1, dim.2 = 2, do.return=TRUE)
 p2 <- PCAPlot(sobj, dim.1 = 2, dim.2 = 3, do.return=TRUE)
 grid.arrange(p1, p2, ncol=2)
@@ -259,41 +256,53 @@ t-distributed stochastic neighbor embedding is a nonlinear dimensionality reduct
 
 Although useful to visualize single cell data, care should be taken when interpreting its results:
 
-- t-SNE is an iterative stochastic algorithm. This means that it will produce different results each time it is run. Also, care should be taken that the algorithm actually converges.
+- t-SNE is an iterative stochastic algorithm. This means that it will produce different results each time it is run. 
 - Because t-SNE *does not preserve distances*, one should not over-interpret the higher order structures of the plot. i.e. just because two clusters appear close toghether on the plot, does not mean they are similar. 
-- The t-SNE algorithm is highly sensitive to the choice of its *perplexity* parameter. This parameter determines what the algorithm considers to be neighboring points. i.e. the number of neighbors of each point is roughly equal to the specified perplexity.
+- The t-SNE algorithm is sensitive to the choice of its *perplexity* parameter. This parameter determines what the algorithm considers to be neighboring points. i.e. the number of neighbors of each point is roughly equal to the specified perplexity.
 
 Read more about t-SNE:
 
 - [t-distributed stochastic neighbor embedding (Wikipedia)](https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding)
 - [How to Use t-SNE Effectively](https://distill.pub/2016/misread-tsne/)
 
-For scRNA-seq datasets, a `perplexity` value in the range of  20 to 50 usually produces good results.
+For scRNA-seq datasets, a `perplexity` value in the range of 20 to 50 usually produces good results.
 
 ```{r tsne}
-sobj <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=50)
+sobj <- RunTSNE(sobj, dims.use = 1:20, do.fast = TRUE, perplexity=30)
 TSNEPlot(sobj, do.label = TRUE)
 ```
 
-**Exercise**: Modify the commands above to try different values of the `perplexity` argument.
+**Exercise**: Modify the commands above to try different values of the `perplexity` argument. E.g. 5, 10, 20, 50, ...
 
 <details><summary><b>Click Here to see the solution</b></summary>
 
 ```{r}
-tmp <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=5)
+tmp <- RunTSNE(sobj, dims.use = 1:20, do.fast = TRUE, perplexity=5)
 TSNEPlot(tmp, do.label = TRUE)
 
-tmp <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=10)
+tmp <- RunTSNE(sobj, dims.use = 1:20, do.fast = TRUE, perplexity=10)
 TSNEPlot(tmp, do.label = TRUE)
 
-tmp <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=20)
+tmp <- RunTSNE(sobj, dims.use = 1:20, do.fast = TRUE, perplexity=20)
 TSNEPlot(tmp, do.label = TRUE)
 
-tmp <- RunTSNE(sobj, dims.use = 1:15, do.fast = TRUE, perplexity=50)
+tmp <- RunTSNE(sobj, dims.use = 1:20, do.fast = TRUE, perplexity=50)
 TSNEPlot(tmp, do.label = TRUE)
 ```
 
 </details>
+
+```{r, eval=FALSE, echo=FALSE}
+sobj <- FindClusters(sobj, reduction.type = "pca", dims.use = 1:20, 
+                     resolution = 0.6, print.output = 0, save.SNN = FALSE)
+TSNEPlot(sobj, do.label = TRUE)
+sobj <- FindClusters(sobj, reduction.type = "pca", dims.use = 1:20, 
+                     resolution = 1.8, print.output = 0, save.SNN = FALSE)
+TSNEPlot(sobj, do.label = TRUE)
+sobj <- FindClusters(sobj, reduction.type = "pca", dims.use = 1:20, 
+                     resolution = 1.2, print.output = 0, save.SNN = FALSE)
+TSNEPlot(sobj, do.label = TRUE)
+```
 
 # Finding marker genes
 
@@ -306,7 +315,7 @@ markers <- markers[ markers$p_val_adj < 0.01, ]
 write.table(markers, file="lung1_markers.txt")
 ```
 
-The above command will return a table containing all identied markers (differentially expressed genes) for each cluster. For example, the *Sftpa1* gene is identified as a marker gene for cluster 0. It is expressed in 99.8% of the cells in cluster 0, and 82.9% of cells in other clusters. It is 2-fold up-regulated in cells belonging to cluster 0.
+The above command will return a table containing all identied markers (differentially expressed genes) for each cluster. For example, the *Sftpa1* gene is identified as a marker gene for cluster 0. It is expressed in 100% of the cells in cluster 0, and 82.8% of cells in other clusters. However, it is 2-fold up-regulated in cells belonging to cluster 0.
 
 ```{r}
 head(markers)
@@ -347,7 +356,7 @@ VlnPlot(sobj, features.plot = head(markers.7$gene), point.size.use=0.5)
 
 <details><summary>Click Here to see the solution</summary>
 
-Some of the clusters appear to be very similar to each other. In particular, clusters 0, 2, 3 and 4 appear to be similar. This is the result of *over-clustering* the cells, which splits large clusters of similar cells into smaller clusters based on small, negligeable, differences between the cells.
+Some of the clusters appear to be very similar to each other. In particular, clusters 0, 2, 3 and 4 appear to be very similar. This is the result of *over-clustering* the cells, which splits large clusters of similar cells into smaller clusters based on small, negligeable, differences between the cells.
 
 </details>
 
@@ -356,12 +365,12 @@ Some of the clusters appear to be very similar to each other. In particular, clu
 **Question**: Based on the t-SNE visualization, and expression of marker genes represented in the above plots, do you think any of the clusters should be combined? If yes, which ones?
 
 <details><summary>Click Here to see the answer</summary>
-It is clear from the expression heatmap that clusters 0, 1, 2 and possibly 13 represent the same population of cells. Clusters 8 and 9 also appear to be very similar, although they are clearly separated on the t-SNE. 
+It appears from the expression heatmap that clusters 0, 2, 3 and 4 represent the same population of cells. Clusters 7 and 12 also appear to be very similar, although they are clearly separated on the t-SNE. 
 </details>
 
 ---
 
-We can check for differences between two specific clusters. Below we check if there any genes that distiguish clusters 0 and 1. It appears that these clusters are distiguished only by a small difference in the expression of 5 mitochondrion encoded genes. 
+We can check for differences between two specific clusters. Below we check if there any genes that distiguish clusters 0 and 2. It appears that these clusters are distiguished only by a small difference in the expression of 6 mitochondrion encoded genes. 
 
 ```{r}
 markers.0.2 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 2, min.pct=0.25)
@@ -370,7 +379,7 @@ markers.0.2 <- markers.0.2[ markers.0.2$p_val_adj < 0.01, ]
 markers.0.2
 ```
 
-**Exercise**: Modify the commands above to check for diferences between clusters 0 and 3, 0 and 4. Also compare clusters and 7 and 13.
+**Exercise**: Modify the commands above to check for diferences between clusters 0 and 3, 0 and 4. Also compare clusters and 7 and 12.
 
 <details><summary>Click Here to see the solution</summary>
 
@@ -381,27 +390,27 @@ markers.0.3 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 3, min.pct=0.25)
 markers.0.4 <- FindMarkers(sobj, ident.1 = 0, ident.2 = 4, min.pct=0.25)
 (markers.0.4 <- markers.0.4[ markers.0.4$p_val_adj < 0.01, ])
 
-markers.7.13 <- FindMarkers(sobj, ident.1 = 7, ident.2 = 13, min.pct=0.25)
-(markers.7.13 <- markers.7.13[ markers.7.13$p_val_adj < 0.01, ])
+markers.7.12 <- FindMarkers(sobj, ident.1 = 7, ident.2 = 12, min.pct=0.25)
+(markers.7.12 <- markers.7.12[ markers.7.12$p_val_adj < 0.01, ])
 ```
 
 ```{r}
 FeaturePlot(sobj, features.plot = c("Dcn", "Cxcl14"), cols.use = c("grey", "blue"), reduction.use = "tsne")
 ```
 
-It appears that most differences between clusters 0, 2, 3 and 4 are due to small differences in the amount of mitochondrial RNA. Clusters 7 and 13 however display a larger amount of differentially expressed genes, and might represent different cell populations.
+It appears that most differences between clusters 0, 2, 3 and 4 are due to small differences in the amount of mitochondrial RNA. Clusters 7 and 12 however display a larger amount of differentially expressed genes, and might indeed represent different cell populations.
 
 </details>
 
 ---
 
-We will merge clusters 0, 2, 3 and 4 into a single cluster (that we name 16). But first, we save the old cluster ids so we can restore them later if need arises.
+We will merge clusters 0, 2, 3 and 4 into a single cluster (that we name 18). But first, we save the old cluster ids so we can restore them later if need arises.
 
 ```{r}
 sobj <- StashIdent(sobj, save.name = "OriginalClusterNames")
 
-current.cluster.ids <- c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
-new.cluster.ids <- c(16,1,16,16,16,5,6,7,8,9,10,11,12,13,14,15)
+current.cluster.ids <- c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17)
+new.cluster.ids <- c(18,1,18,18,18,5,6,7,8,9,10,11,12,13,14,15,16,17)
 sobj@ident <- plyr::mapvalues(sobj@ident, from = current.cluster.ids, to = new.cluster.ids)
 ```
 
@@ -438,8 +447,6 @@ DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key 
 
 Now that we have a clear set of 15 clusters and marker genes associated with each cluster, we may start annotating these clusters, by trying to identify what cell types are associated with each cluster. 
 
-**Question**: What methods would you use to identify which cell populations are being identified?
-
 Some cells have well known markers. For example, the gene Ms4a1 is a marker for B-cells, while Il7r and Cd8a are expressed in T-cells. By inspecting the expression of these genes, B-cell and T-cell clusters can be easily identified.
 
 ```{r, fig.width=6, fig.height=6}
@@ -447,12 +454,12 @@ FeaturePlot(sobj, features.plot = c("Il7r", "Cd8a", "Ms4a1"), cols.use=c("grey",
 ```
 
 ```{r, fig.width=10, fig.height=4}
-VlnPlot(sobj, features.plot = c("Il7r", "Cd8a", "Ms4a1"), point.size.use=0.5)
+VlnPlot(sobj, features.plot = c("Il7r", "Cd8a", "Ms4a1"), point.size.use=0.2)
 ```
 
-Tomorrow, we will see how functional analysis can also help in this process.
+Through the inspection of the top markers identified in each cluster one may begin manually annotating remaining clusters. Tomorrow, we will see how functional analysis can also help in the process of identifying cell types using the full set of marker genes in each cluster.
 
-For now, we will import the annotated cell assignments from the study and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the cell assignments from the paper. 
+For now, we will import the annotated cell assignments from the published study and store them as metadata in the *Seurat* object. Then we plot our t-SNE projection highlighting the cell assignments from the paper and see how well can our clustering assignment recapitulate their results.  
 
 ```{r}
 annotation <- read.table("reference/MCA_CellAssignments.csv", header=TRUE, sep=",")
@@ -480,7 +487,7 @@ Some of the clusters defined in the study are sub-populations of the same type o
 ```{r}
 sobj@meta.data$AnnotationSimple <- gsub("_.*", "", sobj@meta.data$Annotation)
 
-TSNEPlot(sobj, group.by="AnnotationSimple", do.label=TRUE, do.return=TRUE) + theme(legend.position = "none") 
+TSNEPlot(sobj, group.by="AnnotationSimple", do.label=TRUE, do.return=TRUE) + theme(legend.position = "none")
 ```
 
 We can compare our clustering result with the annotated cells by tabulating cluster cell assignments. 
