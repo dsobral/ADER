@@ -151,7 +151,7 @@ For this, we are providing small example datasets and exercises that participant
 
 ### LO 10 - Perform simple functional enrichment analysis and understand the concepts involved
 		
-#### 	LO 10.1 - [How to extract meaning from a list of genes](material/LO10.md#LO10.1)
+#### 	LO 10.1 - [How to extract meaning from a list of genes](material/L10.md#LO10.1)
 		What are functional annotations, what types exist, and where to get them
        
 #### 	LO 10.2 - [Understand the concept of functional enrichment analysis, and the statistics involved](material/L10.md#LO10.2)
