@@ -56,83 +56,83 @@ For this, we are providing small example datasets and exercises that participant
 
 ### LO 1 - Plan your experiment using NGS technologies:
 
-####	LO 1.1 - List possibilities and limitations of NGS sequencing technologies
+####	LO 1.1 - [List possibilities and limitations of NGS sequencing technologies](material/L01_L02.md#LO1)
 		What choices do you have when sending your samples to the sequencing facility
 
-####	LO 1.2 - Choose adequate sequencing for your biological question
+####	LO 1.2 - [Choose adequate sequencing for your biological question](material/L01_L02.md#LO1)
 		How do the sequencing choices influence the kind of questions you can answer
 
-### LO 2 - List steps in the analysis of RNAseq differential expression experiments
+### LO 2 - [List steps in the analysis of RNAseq differential expression experiments](material/L01_L02.md#LO2)
 		What are the steps in RNAseq data analysis
 
 ### LO 3 - Assess the general quality of the raw data from the sequencing facility
 
-#### 	LO 3.1 - Interpret what are fastq files and what is their content
+#### 	LO 3.1 - [Interpret what are fastq files and what is their content](material/L03.md#LO3.1)
 		What information is in fastq files, and how is it organized
 
-#### 	LO 3.2 - Use software like FastQC to process fastq files and produce QC reports
+#### 	LO 3.2 - [Use software like FastQC to process fastq files and produce QC reports](material/L03.md#LO3.2)
 		Detect low quality bases in the QC reports
 		Detect sequence bias and possible presence of adaptors and other contaminants
 
 ### LO 4 - Do simple processing operations in the raw data to improve its quality
 
-#### 	LO 4.1 - Use  trimmomatic to remove low quality bases from your reads
+#### 	LO 4.1 - [Use  trimmomatic to remove low quality bases from your reads](material/L04.md#LO4.1)
 		Use trimmomatic to filter/trim low quality bases from your reads
 
-#### 	LO 4.2 - Use trimmomatic to remove adaptors and other artefactual sequences from your reads
+#### 	LO 4.2 - [Use trimmomatic to remove adaptors and other artefactual sequences from your reads](material/L04.md#LO4.2)
 		Remove adaptors (eg. illumina adaptors) and unwanted sequences (eg. polyA tails) from your reads
 		Check results using FastQC on filtered data
 
 ### LO 5 - Generate alignments of processed reads against a reference genome
 
-#### 	LO 5.1 - What is a reference genome, versioning and where to obtain genomes
+#### 	LO 5.1 - [What is a reference genome, versioning and where to obtain genomes](material/L05.md#LO5.1)
 		Are genomes constant?
 		Obtain genome fasta from Ensembl
 
-#### 	LO 5.2 - Alignment software: hisat2
+#### 	LO 5.2 - [Alignment software: hisat2](material/L05.md#LO5.2)
 		What are the requisites for using burrows-wheeler approaches?	
 		Prepare a reference genome to use with hisat2
 
-#### 	LO 5.3 - Run an alignment: the SAM/BAM alignment format
+#### 	LO 5.3 - [Run an alignment: the SAM/BAM alignment format](material/L05.md#LO5.3)
 		Run hisat2 in an example dataset
 		What is the SAM/BAM format
 	
 ### LO 6 - Assess the general quality of the alignments and detect possible problems
 
-#### 	LO 6.1 - What is a reference gene annotation, versioning and where to obtain
+#### 	LO 6.1 - [What is a reference gene annotation, versioning and where to obtain](material/L06.md#LO6.1)
 		What is the GFF/GTF format
 		Obtain genome GTF from Ensembl
 			
-#### 	LO 6.2 - Visualizing alignments in IGV for single genes
+#### 	LO 6.2 - [Visualizing alignments in IGV for single genes](material/L06.md#LO6.2)
 
-#### 	LO 6.3 - Use Qualimap to assess quality of alignments
+#### 	LO 6.3 - [Use Qualimap to assess quality of alignments](material/L06.md#LO6.3)
 		Interpret general alignment statistics such as percentage of aligned reads
 		Check the reports to assess RNA integrity and diversity
 
 ### LO 7 - Generate tables of counts
 
-#### 	LO 7.1 - The process of generating gene counts from genome aligments
+#### 	LO 7.1 - [The process of generating gene counts from genome aligments](material/L07.md#LO7.1)
 		What parameters we need to consider when counting
 
-#### 	LO 7.2 - Use featurecounts to generate table of gene counts
+#### 	LO 7.2 - [Use featurecounts to generate table of gene counts](material/L07.md#LO7.2)
 		Interpret results from featurecounts
 
-#### 	LO 7.3 - Using Salmon to generate counts only with the transcriptome
+#### 	LO 7.3 - [Using Salmon to generate counts only with the transcriptome](material/L07.md#LO7.3)
 		Interpret results from salmon
 
 ### LO 8 - Generate lists of differentially expressed genes, at least for a simple pairwise comparison
 
-#### 	LO 8.1 - Execute a pairwise differential expression analysis
+#### 	LO 8.1 - [Execute a pairwise differential expression analysis](material/L08.md#LO8.1)
 		Use Galaxy to produce differentially expressed genes with DESeq2
 
-#### 	LO 8.2 - Interpretation and visualization of results
+#### 	LO 8.2 - [Interpretation and visualization of results](material/L08.md#LO8.2)
 		PCA plots comparing all samples: detection of outliers, and batch effects
 		Heatmaps and other plots
 
-#### 	LO 8.3 - Use more complex settings than simple pairwise comparisons
+#### 	LO 8.3 - [Use more complex settings than simple pairwise comparisons](material/L08.md#LO8.3)
 		Account for batch effects and paired data 
 				
-#### 	LO 8.4 - Gain control over your analysis using R and Rstudio
+#### 	LO 8.4 - [Gain control over your analysis using R and Rstudio](material/L08.md#LO8.4)
 		Use R in Rstudio to make a pairwise comparison using DESeq2 and edgeR
 		Use edgeR to perform more complex analysis such as ANOVA-like all versus all comparisons
 
@@ -151,15 +151,15 @@ For this, we are providing small example datasets and exercises that participant
 
 ### LO 10 - Perform simple functional enrichment analysis and understand the concepts involved
 		
-#### 	LO 10.1 - How to extract meaning from a list of genes
+#### 	LO 10.1 - [How to extract meaning from a list of genes](material/LO10.md#LO10.1)
 		What are functional annotations, what types exist, and where to get them
        
-#### 	LO 10.2 - Understand the concept of functional enrichment analysis, and the statistics involved
+#### 	LO 10.2 - [Understand the concept of functional enrichment analysis, and the statistics involved](material/L10.md#LO10.2)
 		What is enrichment analysis and how is it performed
 		How to define sample and population sets
 		Why do we need multiple test corrections
 
-#### 	LO 10.3 - Interpret the results of functional enrichment analysis
+#### 	LO 10.3 - [Interpret the results of functional enrichment analysis](material/L10.md#LO10.3)
 		What can we get from enrichment analysis results
 		Using functional enrichment analysis with real lists of genes
 
