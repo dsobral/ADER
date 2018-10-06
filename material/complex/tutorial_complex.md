@@ -99,11 +99,10 @@ plotMDS(y)
 ![](tutorial_complex_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
 **Question**: What does this global overview tell you?
-
 <details><summary><b>Click Here to see the answer</b></summary>
 The scaling factors are a bit different between samples, but still seem "reasonably" similar. The MDS plot seems to indicate two major axis of separation, where samples are grouped two by two.
 </details>
-
+<br/>
 
 **Note**: The [PCoA (MDS) plot](https://en.wikipedia.org/wiki/Multidimensional_scaling) is not the same as PCA plot, and it is considered to be a more robust way to display distances between samples.
 
@@ -134,18 +133,16 @@ metadata
 
 
 **Question**: Do you see a potential issue in the metadata, regarding the experimental design?
-
 <details><summary><b>Click Here to see the answer</b></summary>
 The cell type is deeply correlated with the sequencing lane. Therefore, we cannot distinguish the technical variation caused by the sequencing lane from the true biological variation. It is well accepted that sequencing lanes have low and well identified technical variation, but it is nonetheless a potential confounder in the experiment.
-
 </details>
-
+<br/>
 
 **Question**: How do you interpret the MDS, considering the metadata information?
-
 <details><summary><b>Click Here to see the answer</b></summary>
 The major axis of separation is the cell type, and the second axis is the developmental stage, with a "logical" transition between virgin, pregnant and lactating. Also, this second axis seems to be more relevant in luminal cells. The replicates seem to group together, as expected.
 </details>
+<br/>
 
 Let's first start simple, and make a pairwise comparison between the two cell types, using GLM (note that we could also use a classical non-GLM method). In this case, we have 6 replicates for each cell type.
 
@@ -231,11 +228,10 @@ table(topgenes$table$FDR<0.05)
 
 
 **Question**: For how many different genes did the GLM model consider the variable CellType significant (the differentially expressed genes we're looking for)?
-
 <details><summary><b>Click Here to see the answer</b></summary>
 A whopping 9662 genes! Depending on what we want, we may be stricter with choosing an FDR. Also, we can choose based on the estimated LogFC.
 </details>
-
+<br/>
 
 Next, let's add the developmental stage (status) as a confounding variable in the design.
 
@@ -297,18 +293,15 @@ table(topgenes$table$FDR<0.05)
 ```
 
 **Question**: How many genes do you get now?
-
 <details><summary><b>Click Here to see the answer</b></summary>
 Even more genes: 11294! 
 </details>
-
+<br/>
 
 What about the status of the mouse? In this case, we have three values (virgin, pregnant, lactating). 
 
 **Task**: Make a design matrix to test status, controlling for cell type.
-
 <details><summary><b>Click Here to see the answer</b></summary>
-
 
 ```r
 design <- model.matrix(~ CellType + Status, data=metadata)
@@ -339,15 +332,14 @@ design
 ## attr(,"contrasts")$Status
 ## [1] "contr.treatment"
 ```
-
 </details>
+<br/>
 
 **Question**: If you do a test with this design, what will you be testing?
-
 <details><summary><b>Click Here to see the answer</b></summary>
 By default, the test checks for the last element in the design matrix, which is Statusvirgin. In this case, it will check whether being a virgin (or not) significantly changes baseline gene expression (in this case, controlling for the cell type).
-
 </details>
+<br/>
 
 You can do combined tests. For example, if you want to see genes significant for Statuspregnant or Statusvirgin (any of the two), you can select the last 2 columns (you just need to do that in the testing phase, as the model fitting is already done):
 
@@ -441,9 +433,7 @@ design
 Now, we need to be carefull when choosing the variables to check for significance, because simply choosing the column indicates whether that variable is different from zero (which is true for all expressed genes!). 
 
 **Question**: How many genes you get with the default test for glmQLFtest?
-
 <details><summary><b>Click Here to see the answer</b></summary>
-
 
 ```r
 y <- DGEList(counts=rawdata[,3:14], genes=rawdata[,1:2])
@@ -460,9 +450,8 @@ table(topgenes$table$FDR<0.05)
 ## FALSE  TRUE 
 ##  5788 21391
 ```
-
 </details>
-
+<br/>
 
 Now we need to create new variables to test if they are different from zero. For example, to see genes differentially expressed between virgin and pregnant in Luminal cells:
 
@@ -569,7 +558,6 @@ table(topgenes$table$FDR<0.05)
 
 
 **Task**: Using the code above as an example, try to replicate the paired Tumour/Normal analysis from Tuch et al, using edgeR. You can find the counts table in the complex folder.
-
 <details><summary><b>Click Here to see a suggested solution</b></summary>
 [suggested solution](tutorial2.md)
 </details>
