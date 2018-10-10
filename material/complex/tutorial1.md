@@ -202,7 +202,7 @@ table(resHTSeq$pvalue < 0.01)
 
 ---
 
-Finally, we sort this table by p-value (smaller p-values on top), and save it to a file so that we can later import it into Excel. 
+We sort this table by p-value (smaller p-values on top), and save it to a file so that we can later import it into Excel. 
 
 
 ```r
@@ -248,6 +248,89 @@ head(normCounts)
 write.csv(as.data.frame(orderedRes), file="trapnell_normCounts.DESeq2.csv")
 ```
 
+Finally, we can merge the two tables into a single one.
+
+
+```r
+merged.results <- merge(normCounts, orderedRes, by="row.names")
+
+head(merged.results)
+```
+
+```
+##     Row.names trapnell_counts_C1_R1 trapnell_counts_C1_R2
+## 1 FBgn0000003               0.00000               0.00000
+## 2 FBgn0000008             601.61191             601.95507
+## 3 FBgn0000014              88.44375              78.64252
+## 4 FBgn0000015              70.94939              65.04998
+## 5 FBgn0000017            2593.05424            2334.03223
+## 6 FBgn0000018             318.78628             333.01708
+##   trapnell_counts_C1_R3 trapnell_counts_C2_R1 trapnell_counts_C2_R2
+## 1                0.0000               0.00000               0.00000
+## 2              540.4924             544.48136             622.53341
+## 3              100.9178              89.20881             127.98795
+## 4               50.4589              56.39637              72.69716
+## 5             2393.8864            2614.74099            2672.38848
+## 6              352.2419             311.71814             294.88425
+##   trapnell_counts_C2_R3   baseMean log2FoldChange      lfcSE       stat
+## 1               0.00000    0.00000             NA         NA         NA
+## 2             560.62587  578.61667    -0.01363018 0.09778363 -0.1393912
+## 3             104.35007   98.25848     0.26279172 0.22066004  1.1909348
+## 4              74.68191   65.03895     0.12821306 0.26373025  0.4861523
+## 5            2631.25864 2539.89350     0.11317799 0.05904858  1.9166927
+## 6             352.94877  327.26607    -0.06538546 0.12276560 -0.5326041
+##       pvalue      padj
+## 1         NA        NA
+## 2 0.88914103 0.9992327
+## 3 0.23367917 0.9515670
+## 4 0.62685920        NA
+## 5 0.05527698 0.6446372
+## 6 0.59430768 0.9992327
+```
+
+**Exercise**: When merging the two tables, we lost the ordering by p-value. Can you reorder the `merged.results` table by p.value?
+
+<details><summary><b>Click Here to see the answer</b></summary>
+
+
+```r
+merged.results <- merged.results[ order(merged.results$padj), ]
+head(merged.results)
+```
+
+```
+##         Row.names trapnell_counts_C1_R1 trapnell_counts_C1_R2
+## 124   FBgn0000370              8501.291              8316.689
+## 3545  FBgn0030362             10506.340             10111.874
+## 13110 FBgn0086904             10371.245             10938.106
+## 9801  FBgn0039830              8337.039              8705.047
+## 2063  FBgn0022893              8526.561              8671.066
+## 14818 FBgn0263598              3419.177              3536.001
+##       trapnell_counts_C1_R3 trapnell_counts_C2_R1 trapnell_counts_C2_R2
+## 124                8562.486              22004.84             22694.824
+## 3545              10902.032              26508.35             25890.427
+## 13110             10568.227              27030.27             28008.884
+## 9801               8094.771              20488.29             20395.136
+## 2063               8991.387              21115.83             22103.008
+## 14818              3565.115               8983.43              8519.902
+##       trapnell_counts_C2_R3  baseMean log2FoldChange      lfcSE     stat
+## 124               22378.998 15409.855       1.402136 0.04082003 34.34921
+## 3545              26029.204 18324.704       1.315089 0.04352489 30.21463
+## 13110             26143.785 18843.419       1.348634 0.04462244 30.22321
+## 9801              20257.213 14379.583       1.282328 0.04359018 29.41781
+## 2063              23197.430 15434.213       1.342575 0.04778029 28.09893
+## 14818              8828.834  6142.077       1.323648 0.04757299 27.82351
+##              pvalue          padj
+## 124   1.447240e-258 9.535863e-255
+## 3545  1.521793e-200 3.342366e-197
+## 13110 1.173879e-200 3.342366e-197
+## 9801  3.250763e-190 5.354819e-187
+## 2063  1.009490e-173 1.330306e-170
+## 14818 2.253991e-170 2.475257e-167
+```
+
+</details>
+
 # Visualizing results
 
 *DESeq2* provides several functions to visualize the results, while additional plots can be made using the extensive R graphics capabilities. Visualization can help to better understand the results, and catch potential problems in the data and analysis. We start here by reproducing the plots that we previously obtained using Galaxy.
@@ -261,7 +344,7 @@ We can plot the *DESeq2* dispersion re-estimation procedure by typing:
 plotDispEsts(ddsHTSeq)
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
 
 ## P-value distribution
 
@@ -272,7 +355,7 @@ As a sanity check, we can inspect the distribution of p-values using the `hist` 
 hist(resHTSeq$pvalue, breaks=0:50/50, xlab="p value", main="Histogram of nominal p values")
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 ## MA-plot
 
@@ -283,7 +366,7 @@ To make an (unshrunken) **MA-plot**, that displays the relationship between a ge
 plotMA(resHTSeq)
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
 
 To obtain an **MA-plot** with shrunken log2 fold-changes we use the `lfcShrink` function. This function is equivalent to the `results` function that we called previously, but will return a table with the *log2FoldChange* and *lfcSE* columns replaced with the shrunken values. The `coef` argument is used to specify what *contrast* we are interested in analysing (in this case condition_C2_vs_C1), so we first call `resultsNames` to determine the right coefficient.
 
@@ -301,7 +384,7 @@ resHTSeqShrunk <- lfcShrink(ddsHTSeq, coef=2)
 plotMA(resHTSeqShrunk)
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
 
 ## Volcano plot
 
@@ -316,7 +399,7 @@ points(resHTSeq$log2FoldChange[ highlight ], -log10(resHTSeq$pvalue[ highlight ]
 abline(v=0, h=-log10(0.05), lty="dashed", col="grey")
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
 
 **Exercise**: Change the commands above to make a **volcano plot** using the shrunken log fold changes instead. Also change the threshold of differential expression to 0.01 and the color of the differentially expressed genes to green.
 
@@ -331,7 +414,7 @@ points(resHTSeqShrunk$log2FoldChange[ highlight ], -log10(resHTSeqShrunk$pvalue[
 abline(v=0, h=-log10(0.01), lty="dashed", col="grey")
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-18-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
 
 </details>
 
@@ -358,7 +441,7 @@ transformed.vsd <- varianceStabilizingTransformation(ddsHTSeq, blind=TRUE)
 plotPCA(transformed.vsd)
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
 
 ## Sample-to-sample correlation heatmap
 
@@ -372,7 +455,7 @@ dists <- as.matrix(dist(t(normCounts)))
 heatmap(dists, main="Clustering of sample-to-sample distances", scale="none")
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
 
 We can also use pearson (or spearman) correlations as a distance metric. This is more robust than simple euclidean distances, and has the advantage that we can even use the raw (non-normalized) counts as input. It is generally a good idea to log transform the counts first.
 
@@ -384,7 +467,7 @@ dists <- 1 - cor(log10_rawCounts, method="pearson")
 heatmap(dists, main="Clustering of sample-to-sample pearson correlations", scale="none")
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
 
 # Other visualizations
 
@@ -429,7 +512,7 @@ heatmap.2(diffcounts,
           distfun = function(x) as.dist(1 - cor(t(x))))
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-22-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-24-1.png)<!-- -->
 
 The following commands are used to plot a heatmap of the 20 most differentially expressed genes. For this, we use the ordered results table to determine which genes are most differentially expressed, and then plot the values from the normalized counts table (transformed to log10).
 
@@ -459,6 +542,68 @@ pheatmap(values,
          width=6)
 ```
 
-![](tutorial1_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
+![](tutorial1_files/figure-html/unnamed-chunk-25-1.png)<!-- -->
 
+# Session information
+
+
+```r
+sessionInfo()
+```
+
+```
+## R version 3.4.4 (2018-03-15)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Ubuntu 16.04.4 LTS
+## 
+## Matrix products: default
+## BLAS: /usr/lib/libblas/libblas.so.3.6.0
+## LAPACK: /usr/lib/lapack/liblapack.so.3.6.0
+## 
+## locale:
+##  [1] LC_CTYPE=pt_PT.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=pt_PT.UTF-8        LC_COLLATE=en_US.UTF-8    
+##  [5] LC_MONETARY=pt_PT.UTF-8    LC_MESSAGES=en_US.UTF-8   
+##  [7] LC_PAPER=pt_PT.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=pt_PT.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+## [8] methods   base     
+## 
+## other attached packages:
+##  [1] pheatmap_1.0.8             gplots_3.0.1              
+##  [3] DESeq2_1.18.1              SummarizedExperiment_1.8.1
+##  [5] DelayedArray_0.4.1         matrixStats_0.52.2        
+##  [7] Biobase_2.38.0             GenomicRanges_1.30.1      
+##  [9] GenomeInfoDb_1.14.0        IRanges_2.12.0            
+## [11] S4Vectors_0.16.0           BiocGenerics_0.24.0       
+## 
+## loaded via a namespace (and not attached):
+##  [1] bit64_0.9-7            splines_3.4.4          gtools_3.5.0          
+##  [4] Formula_1.2-2          latticeExtra_0.6-28    blob_1.1.0            
+##  [7] GenomeInfoDbData_1.0.0 yaml_2.2.0             pillar_1.3.0          
+## [10] RSQLite_2.0            backports_1.1.2        lattice_0.20-35       
+## [13] digest_0.6.16          RColorBrewer_1.1-2     XVector_0.18.0        
+## [16] checkmate_1.8.5        colorspace_1.3-2       htmltools_0.3.6       
+## [19] Matrix_1.2-14          plyr_1.8.4             XML_3.98-1.9          
+## [22] genefilter_1.60.0      zlibbioc_1.24.0        xtable_1.8-2          
+## [25] scales_1.0.0           gdata_2.18.0           BiocParallel_1.12.0   
+## [28] htmlTable_1.11.1       tibble_1.4.2           annotate_1.56.1       
+## [31] ggplot2_2.2.1          nnet_7.3-12            lazyeval_0.2.1        
+## [34] survival_2.42-3        magrittr_1.5           crayon_1.3.4          
+## [37] memoise_1.1.0          evaluate_0.10.1        foreign_0.8-70        
+## [40] tools_3.4.4            data.table_1.11.4      stringr_1.3.1         
+## [43] munsell_0.5.0          locfit_1.5-9.1         cluster_2.0.6         
+## [46] AnnotationDbi_1.40.0   compiler_3.4.4         caTools_1.17.1        
+## [49] rlang_0.2.2            grid_3.4.4             RCurl_1.95-4.10       
+## [52] rstudioapi_0.7         htmlwidgets_1.2        bitops_1.0-6          
+## [55] base64enc_0.1-3        labeling_0.3           rmarkdown_1.9         
+## [58] gtable_0.2.0           DBI_0.7                gridExtra_2.3         
+## [61] knitr_1.20             bit_1.1-12             Hmisc_4.1-1           
+## [64] rprojroot_1.3-2        KernSmooth_2.23-15     stringi_1.2.4         
+## [67] Rcpp_0.12.18           geneplotter_1.56.0     rpart_4.1-13          
+## [70] acepack_1.4.1
+```
 

@@ -97,7 +97,7 @@ table(resHTSeq$pvalue < 0.01)
 
 ---
 
-Finally, we sort this table by p-value (smaller p-values on top), and save it to a file so that we can later import it into Excel. 
+We sort this table by p-value (smaller p-values on top), and save it to a file so that we can later import it into Excel. 
 
 ```{r}
 orderedRes <- resHTSeq[ order(resHTSeq$padj), ]
@@ -114,6 +114,25 @@ head(normCounts)
 
 write.csv(as.data.frame(orderedRes), file="trapnell_normCounts.DESeq2.csv")
 ```
+
+Finally, we can merge the two tables into a single one.
+
+```{r}
+merged.results <- merge(normCounts, orderedRes, by="row.names")
+
+head(merged.results)
+```
+
+**Exercise**: When merging the two tables, we lost the ordering by p-value. Can you reorder the `merged.results` table by p.value?
+
+<details><summary><b>Click Here to see the answer</b></summary>
+
+```{r}
+merged.results <- merged.results[ order(merged.results$padj), ]
+head(merged.results)
+```
+
+</details>
 
 # Visualizing results
 
@@ -255,4 +274,9 @@ pheatmap(values,
          width=6)
 ```
 
+# Session information
+
+```{r}
+sessionInfo()
+```
 

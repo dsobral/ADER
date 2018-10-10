@@ -1,3 +1,6 @@
+## ---- eval=FALSE, echo=FALSE---------------------------------------------
+## knitr::purl("tutorial1.Rmd")
+
 ## ------------------------------------------------------------------------
 sampleNames <- c("trapnell_counts_C1_R1", "trapnell_counts_C1_R2", "trapnell_counts_C1_R3", "trapnell_counts_C2_R1", "trapnell_counts_C2_R2", "trapnell_counts_C2_R3")
 
@@ -36,6 +39,10 @@ head(resHTSeq)
 table(resHTSeq$padj < 0.05)
 
 ## ------------------------------------------------------------------------
+table(resHTSeq$padj < 0.01)
+table(resHTSeq$pvalue < 0.01)
+
+## ------------------------------------------------------------------------
 orderedRes <- resHTSeq[ order(resHTSeq$padj), ]
 
 write.csv(as.data.frame(orderedRes), file="trapnell_C1_VS_C2.DESeq2.csv")
@@ -48,6 +55,15 @@ head(normCounts)
 write.csv(as.data.frame(orderedRes), file="trapnell_normCounts.DESeq2.csv")
 
 ## ------------------------------------------------------------------------
+merged.results <- merge(normCounts, orderedRes, by="row.names")
+
+head(merged.results)
+
+## ------------------------------------------------------------------------
+merged.results <- merged.results[ order(merged.results$padj), ]
+head(merged.results)
+
+## ------------------------------------------------------------------------
 plotDispEsts(ddsHTSeq)
 
 ## ------------------------------------------------------------------------
@@ -56,24 +72,39 @@ hist(resHTSeq$pvalue, breaks=0:50/50, xlab="p value", main="Histogram of nominal
 ## ------------------------------------------------------------------------
 plotMA(resHTSeq)
 
-shrunk_res <- lfcShrink(dds = ddsHTSeq, res = resHTSeq, coef = 2)
-plotMA(shrunk_res)
+## ------------------------------------------------------------------------
+resultsNames(ddsHTSeq)
+resHTSeqShrunk <- lfcShrink(ddsHTSeq, coef=2)
+plotMA(resHTSeqShrunk)
 
 ## ------------------------------------------------------------------------
-plot(resHTSeq$log2FoldChange, -log10(resHTSeq$pvalue), xlab="log2 Fold-change", ylab="-log P-value", pch=20, cex=0.5)
-points(resHTSeq$log2FoldChange[ resHTSeq$padj<0.05 ], -log10(resHTSeq$pvalue[ resHTSeq$padj<0.05 ]), col="red", pch=20, cex=0.5)
+highlight <- which(resHTSeq$padj < 0.05)
+
+plot(resHTSeq$log2FoldChange, -log10(resHTSeq$pvalue), xlab="log2 Fold-change", ylab="-log P-adjusted", pch=20, cex=0.5)
+points(resHTSeq$log2FoldChange[ highlight ], -log10(resHTSeq$pvalue[ highlight ]), col="red", pch=20, cex=0.5)
 abline(v=0, h=-log10(0.05), lty="dashed", col="grey")
 
 ## ------------------------------------------------------------------------
-vsd <- varianceStabilizingTransformation(ddsHTSeq, blind=FALSE)
+highlight <- which(resHTSeqShrunk$padj < 0.01)
 
-plotPCA(vsd)
+plot(resHTSeqShrunk$log2FoldChange, -log10(resHTSeqShrunk$pvalue), xlab="shrunken log2 Fold-change", ylab="-log P-adjusted", pch=20, cex=0.5)
+points(resHTSeqShrunk$log2FoldChange[ highlight ], -log10(resHTSeqShrunk$pvalue[ highlight ]), col="green", pch=20, cex=0.5)
+abline(v=0, h=-log10(0.01), lty="dashed", col="grey")
 
 ## ------------------------------------------------------------------------
-dists <- dist(t(assay(vsd)))
+transformed.vsd <- varianceStabilizingTransformation(ddsHTSeq, blind=TRUE)
 
-# headmap of distances
-heatmap(as.matrix(dists), main="Clustering of euclidean distances", scale="none")
+plotPCA(transformed.vsd)
+
+## ------------------------------------------------------------------------
+dists <- as.matrix(dist(t(normCounts)))
+heatmap(dists, main="Clustering of sample-to-sample distances", scale="none")
+
+## ------------------------------------------------------------------------
+log10_rawCounts <- log10(counts(ddsHTSeq) + 1)
+  
+dists <- 1 - cor(log10_rawCounts, method="pearson")
+heatmap(dists, main="Clustering of sample-to-sample pearson correlations", scale="none")
 
 ## ---- fig.height=8, fig.width=5------------------------------------------
 library(gplots)
@@ -112,59 +143,5 @@ pheatmap(values,
          width=6)
 
 ## ------------------------------------------------------------------------
-sampleFiles <- c("trapnell_counts_C1_R1.tab", "trapnell_counts_C1_R2.tab", "trapnell_counts_C1_R3.tab", "trapnell_counts_C2_R1.tab", "trapnell_counts_C2_R2.tab", "trapnell_counts_C2_R3.tab")
-
-tabs <- lapply(sampleFiles, function(x) read.table(x, col.names = c("Gene", x)))
-countdata <- Reduce(f = function(x, y) merge(x, y, by="Gene"), x = tabs)
-
-head(countdata)
-
-rownames(countdata) <- as.character(countdata$Gene)
-countdata$Gene<-NULL
-
-## ------------------------------------------------------------------------
-library(edgeR)
-
-## ------------------------------------------------------------------------
-mygroups <- c("C1","C1","C1","C2","C2","C2")
-
-y <- DGEList(counts=countdata, genes=rownames(countdata), group = mygroups)
-
-## ------------------------------------------------------------------------
-y <- calcNormFactors(y)
-y <- estimateDisp(y)
-et <- exactTest(y)
-
-## ------------------------------------------------------------------------
-result_edgeR <- as.data.frame(topTags(et, n=nrow(countdata)))
-
-table(result_edgeR$FDR < 0.05)
-
-plot(result_edgeR$logFC, -log10(result_edgeR$FDR), col=ifelse(result_edgeR$FDR<0.05,"red","black"),main="FDR volcano plot",xlab="log2FC",ylab="-log10(FDR)")
-
-hist(result_edgeR$PValue, breaks=20, xlab="P-Value", col="royalblue", ylab="Frequency", main="P-value distribution")
-
-## ------------------------------------------------------------------------
-comp_table <- merge(as.data.frame(resHTSeq), result_edgeR, by="row.names")
-
-head(comp_table)
-
-## ------------------------------------------------------------------------
-table("DESeq2" = comp_table$padj < 0.05, "edgeR" = comp_table$FDR < 0.05)
-
-## ------------------------------------------------------------------------
-w <- which(rowSums(countdata) > 0)
-countdata <- countdata[ w, ]
-
-## ------------------------------------------------------------------------
-y <- DGEList(counts=countdata, genes=rownames(countdata), group = mygroups)
-y <- calcNormFactors(y)
-y <- estimateDisp(y)
-et <- exactTest(y)
-
-result_edgeR_2 <- as.data.frame(topTags(et, n=nrow(countdata)))
-
-table(result_edgeR_2$FDR < 0.05)
-
-hist(result_edgeR_2$PValue, breaks=20, xlab="P-Value", col="royalblue", ylab="Frequency", main="P-value distribution")
+sessionInfo()
 
