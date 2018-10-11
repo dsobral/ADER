@@ -1,7 +1,7 @@
 ---
 title: "ADER18S - Analysis of PBMC4k using Seurat"
 author: "Daniel Neves"
-date: '17 Setembro, 2018'
+date: '11 Outubro, 2018'
 output: 
   html_document:
     keep_md: yes
@@ -25,13 +25,13 @@ First we load the raw UMI matrix into the R environment. *Seurat* provides a `Re
 
 
 ```r
-mat.raw <- Read10X(data.dir = "matrices/output_cellranger_pbmc4k/outs/filtered_gene_bc_matrices/GRCh38")
+mat.raw <- Read10X(data.dir = "output_cellranger_full/outs/filtered_gene_bc_matrices/GRCh38")
 
 dim(mat.raw)
 ```
 
 ```
-## [1] 33694  4321
+## [1] 33694  4340
 ```
 
 We start here with the pre-filtered matrix provided by `cellranger` containing the set of 4321 high-confidence cells. So we can proceed immediately to create the *Seurat* object.
@@ -44,7 +44,7 @@ dim(sobj@data)
 ```
 
 ```
-## [1] 15410  4321
+## [1] 15411  4340
 ```
 
 # Downstream analysis
@@ -100,7 +100,7 @@ dim(sobj@data)
 ```
 
 ```
-## [1] 15410  4253
+## [1] 15411  4272
 ```
 
 </details>
@@ -135,7 +135,7 @@ length(sobj@var.genes)
 ```
 
 ```
-## [1] 1245
+## [1] 1252
 ```
 
 
@@ -174,7 +174,7 @@ sobj <- ScaleData(object = sobj, vars.to.regress = c("nUMI", "percent.mito"))
 
 ```
 ## 
-## Time Elapsed:  21.714617729187 secs
+## Time Elapsed:  21.6098577976227 secs
 ```
 
 ```
@@ -257,13 +257,13 @@ head(markers)
 ```
 
 ```
-##               p_val avg_logFC pct.1 pct.2 p_val_adj cluster          gene
-## S100A8            0  2.796538 0.991 0.522         0       0        S100A8
-## S100A9            0  2.753447 0.990 0.617         0       0        S100A9
-## LYZ               0  2.509494 0.995 0.551         0       0           LYZ
-## S100A12           0  1.858657 0.910 0.105         0       0       S100A12
-## RP11-1143G9.4     0  1.780576 0.973 0.146         0       0 RP11-1143G9.4
-## TYROBP            0  1.740702 0.993 0.373         0       0        TYROBP
+##               p_val avg_logFC pct.1 pct.2     p_val_adj cluster  gene
+## RPL21 9.595436e-177 0.3426853 1.000 0.999 1.478753e-172       0 RPL21
+## RPS27 5.806036e-170 0.3684605 1.000 1.000 8.947683e-166       0 RPS27
+## RPL31 5.196314e-163 0.4276901 0.998 0.997 8.008040e-159       0 RPL31
+## RPL32 1.498597e-162 0.3333247 1.000 1.000 2.309487e-158       0 RPL32
+## RPL34 1.495631e-161 0.3295687 1.000 0.999 2.304916e-157       0 RPL34
+## RPS14 3.348956e-158 0.3324048 1.000 1.000 5.161076e-154       0 RPS14
 ```
 
 
@@ -276,7 +276,86 @@ DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key 
 
 </details>
 
+## Exercise 7: Identify cell subpolulations
 
+Use the `VlnPlot` and `FeaturePlot` functions to examine the expresssion of the marker genes below. Can you indentify some of the cell subpopulations?  
+
+| Markers | Cell Type |
+|-----:---|-----:-----|
+| IL7R	  | CD4 T cells |
+|	CD14, LYZ	| CD14+ Monocytes |
+|	MS4A1 |	B cells |
+|	CD8A | CD8 T cells |
+|	FCGR3A, MS4A7	FCGR3A+ | Monocytes |
+|	GNLY, NKG7	| NK cells |
+|	FCER1A, CST3	| Dendritic Cells |
+|	PPBP	| Megakaryocytes |
+
+<details><summary><b>Click Here to see one solution</b></summary>
+
+
+```r
+VlnPlot(sobj, features.plot = c("IL7R", "MS4A1"), point.size.use=0.2)
+```
+
+![](exercise-seurat-pbmc4k_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+
+```r
+VlnPlot(sobj, features.plot = c("CD14", "LYZ", "FCGR3A", "MS4A7"), point.size.use=0.2)
+```
+
+![](exercise-seurat-pbmc4k_files/figure-html/unnamed-chunk-14-2.png)<!-- -->
+
+```r
+VlnPlot(sobj, features.plot = c("MS4A1"), point.size.use=0.2)
+```
+
+![](exercise-seurat-pbmc4k_files/figure-html/unnamed-chunk-14-3.png)<!-- -->
+
+```r
+VlnPlot(sobj, features.plot = c("FCER1A", "CST3"), point.size.use=0.2)
+```
+
+![](exercise-seurat-pbmc4k_files/figure-html/unnamed-chunk-14-4.png)<!-- -->
+
+```r
+VlnPlot(sobj, features.plot = c("PPBP"), point.size.use=0.2)
+```
+
+![](exercise-seurat-pbmc4k_files/figure-html/unnamed-chunk-14-5.png)<!-- -->
+
+
+```r
+FeaturePlot(sobj, features.plot = c("IL7R", "MS4A1"), cols.use=c("grey", "red"), pt.size=0.5)
+```
+
+![](exercise-seurat-pbmc4k_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
+
+```r
+FeaturePlot(sobj, features.plot = c("CD14", "LYZ", "FCGR3A", "MS4A7"), cols.use=c("grey", "red"), pt.size=0.5)
+```
+
+![](exercise-seurat-pbmc4k_files/figure-html/unnamed-chunk-15-2.png)<!-- -->
+
+```r
+FeaturePlot(sobj, features.plot = c("MS4A1"), cols.use=c("grey", "red"), pt.size=0.5)
+```
+
+![](exercise-seurat-pbmc4k_files/figure-html/unnamed-chunk-15-3.png)<!-- -->
+
+```r
+FeaturePlot(sobj, features.plot = c("FCER1A", "CST3"), cols.use=c("grey", "red"), pt.size=0.5)
+```
+
+![](exercise-seurat-pbmc4k_files/figure-html/unnamed-chunk-15-4.png)<!-- -->
+
+```r
+FeaturePlot(sobj, features.plot = c("PPBP"), cols.use=c("grey", "red"), pt.size=0.5)
+```
+
+![](exercise-seurat-pbmc4k_files/figure-html/unnamed-chunk-15-5.png)<!-- -->
+
+</details>
 
 # Session Information
 
