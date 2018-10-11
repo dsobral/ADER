@@ -281,7 +281,7 @@ DoHeatmap(sobj, genes.use = top.markers$gene, slim.col.label = TRUE, remove.key 
 Use the `VlnPlot` and `FeaturePlot` functions to examine the expresssion of the marker genes below. Can you indentify some of the cell subpopulations?  
 
 | Markers | Cell Type |
-|-----:---|-----:-----|
+|:--------|:----------|
 | IL7R	  | CD4 T cells |
 |	CD14, LYZ	| CD14+ Monocytes |
 |	MS4A1 |	B cells |
