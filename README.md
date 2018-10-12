@@ -217,7 +217,7 @@ For this, we are providing small example datasets and exercises that participant
 ### Friday, October 12th
 
 + 09:30 - 10:00 Morning wrap-up (what have we done so far?)
-+ 10:00 - 11:00 [How to extract meaning from a list of genes](material/L10.md#LO10.1).
++ 10:00 - 11:00 [From genes to gene functions](material/L10.md#LO10.1).
 + 11:00 - 11:30 ***Coffee Break***
 + 11:30 - 12:30 [Understand the concept of functional enrichment analysis, and the statistics involved](material/L10.md#LO10.2).
 + 12:30 - 14:00 ***LUNCH BREAK***
